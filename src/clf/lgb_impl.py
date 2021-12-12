@@ -1,6 +1,6 @@
 from lightgbm import LGBMClassifier as lgb
 
-from utils.utils_eval import performance
+from utils.util_eval import performance
 
 
 def lgb_train(train_x, train_y, val_x, val_y, params):
@@ -36,12 +36,11 @@ def lgb_train(train_x, train_y, val_x, val_y, params):
     return opt_hps, scores
 
 
-def lgb_predict(train_x, train_y, test_x, test_y, opt_hps, params):
+def lgb_predict(bt_type, train_x, train_y, test_x, test_y, opt_hps, params):
     metric_list = []
     test_prob_list = []
-    boosting_type = params['boosting_type']
     for n, t in opt_hps:
-        clf = lgb(boosting_type=boosting_type, objective='binary', n_estimators=t, num_leaves=n,
+        clf = lgb(boosting_type=bt_type, objective='binary', n_estimators=t, num_leaves=n,
                   early_stopping_rounds=5, probability=True)
         clf.fit(train_x, train_y)
         test_y_hat = clf.predict(test_x)

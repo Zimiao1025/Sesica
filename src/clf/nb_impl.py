@@ -1,17 +1,17 @@
 from sklearn.naive_bayes import GaussianNB, MultinomialNB, BernoulliNB
-from utils.utils_eval import performance
+from utils.util_eval import performance
 
 
-def nb_train(train_x, train_y, val_x, val_y, params):
+def nb_train(nb_model, train_x, train_y, val_x, val_y, params):
     # For MultinomialNB and BernoulliNB, [0.0, 1.0]
-    alpha_range = params['nb_alpha'] if params['nb_model'] != 'GaussianNB' else [1.0]
+    alpha_range = params['nb_alpha'] if nb_model != 'gnb' else [1.0]
     # 保存参数及其对应评价指标的字典
     metric_dict = {}
     val_prob_dict = {}
     for alpha in alpha_range:
-        if params['nb_model'] == 'GaussianNB':
+        if nb_model == 'gnb':
             clf = GaussianNB(probability=True)
-        elif params['nb_model'] == 'MultinomialNB':
+        elif nb_model == 'mnb':
             clf = MultinomialNB(alpha=alpha, probability=True)
         else:
             clf = BernoulliNB(alpha=alpha, probability=True)

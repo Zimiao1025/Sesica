@@ -39,7 +39,7 @@ def svm_params_check(cost, gamma, gs_mode=0):  # 2: meticulous; 1: 'rough'; 0: '
     return c_range, g_range
 
 
-def rf_params_check(tree, gs_mode=0):
+def rt_params_check(tree, gs_mode=0):
     if gs_mode == 0:
         if len(tree) == 1:
             t_range = range(tree[0], tree[0] + 100, 100)
@@ -48,7 +48,7 @@ def rf_params_check(tree, gs_mode=0):
         elif len(tree) == 3:
             t_range = range(tree[0], tree[1] + 100, tree[2])
         else:
-            error_info = 'The number of input value of parameter "rf_tree" should be no more than 3!'
+            error_info = 'The number of input value of parameter "n_estimators" should be no more than 3!'
             sys.stderr.write(error_info)
             return False
     elif gs_mode == 1:
@@ -118,4 +118,20 @@ def lgb_params_check(tree, num_leaves, gs_mode=0):
 
     return t_range, n_range
 
+
+def clf_params_control(args):
+    params = {'clf': args.clf, 'top_n': args.top_n, 'metric': args.metric}
+    if args.clf == 'svm':
+        params['cost'], params['gamma'] = svm_params_check(args.cost, args.gamma, args.gs_mode)
+    elif args.clf in ['rf', 'et']:
+        params['n_estimators'] = rt_params_check(args.n_estimators, args.gs_mode)
+    elif args.clf in ['gnb', 'mnb', 'bnb']:
+        params['nb_alpha'] = nb_params_check(args.nb_alpha, args.gs_mode)
+    elif args.clf in ['gbdt', 'dart', 'goss']:
+        params['lgb_tree'], params['num_leaves'] = lgb_params_check(args.lgb_tree, args.num_leaves, args.gs_mode)
+    else:
+        # 不推荐进行遍历
+        params['act'] = args.act
+        params['hls'] = args.hls
+    return params
 

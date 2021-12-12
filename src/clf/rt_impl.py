@@ -1,16 +1,17 @@
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier
 
-from utils.utils_eval import performance
+from utils.util_eval import performance
 
 
-def rf_train(train_x, train_y, val_x, val_y, params):
+def rt_train(tree_model, train_x, train_y, val_x, val_y, params):
     # 获取n_estimators的范围
-    t_range = params['rf_tree']
+    t_range = params['n_estimators']
     # 保存参数及其对应评价指标的字典
     metric_dict = {}
     val_prob_dict = {}
     for t in t_range:
-        clf = RandomForestClassifier(n_estimators=t, probability=True)
+        clf = RandomForestClassifier(n_estimators=t, probability=True) if tree_model == 'rf' \
+            else ExtraTreesClassifier(n_estimators=t, probability=True)
         clf.fit(train_x, train_y)
         val_y_hat = clf.predict(val_x)
         val_prob = clf.predict_proba(val_x)[:, 1]
@@ -33,11 +34,12 @@ def rf_train(train_x, train_y, val_x, val_y, params):
     return opt_hps, scores
 
 
-def rf_predict(train_x, train_y, test_x, test_y, opt_hps, params):
+def rt_predict(tree_model, train_x, train_y, test_x, test_y, opt_hps, params):
     metric_list = []
     test_prob_list = []
     for t in opt_hps:
-        clf = RandomForestClassifier(n_estimators=t, probability=True)
+        clf = RandomForestClassifier(n_estimators=t, probability=True) if tree_model == 'rf' \
+            else ExtraTreesClassifier(n_estimators=t, probability=True)
         clf.fit(train_x, train_y)
         test_y_hat = clf.predict(test_x)
         test_prob = clf.predict_proba(test_x)[:, 1]

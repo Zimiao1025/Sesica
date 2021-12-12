@@ -1,6 +1,6 @@
 from sklearn.neural_network import MLPClassifier
 
-from utils.utils_eval import performance
+from utils.util_eval import performance
 
 
 def mlp_train(train_x, train_y, val_x, val_y, params):
