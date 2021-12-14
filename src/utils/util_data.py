@@ -56,3 +56,14 @@ def read_csv(file_name):
         for row in dict_reader:
             qk_dict_list.append(row)
     return qk_dict_list
+
+
+def dataset_split(index_list):
+    # constant seed
+    np.random.seed(1025)
+    # split node of graph a for train
+    sp_num = len(index_list) // 5
+    index_list = np.array(index_list)
+    np.random.shuffle(index_list)
+
+    return index_list[sp_num:], index_list[:sp_num]

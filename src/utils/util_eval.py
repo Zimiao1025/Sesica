@@ -1,4 +1,6 @@
 import math
+import numpy as np
+import pandas as pd
 
 from sklearn.metrics import roc_auc_score
 
@@ -28,9 +30,8 @@ def performance(origin_labels, predict_labels, deci_value):
 
     try:
         sn = tp / (tp + fn)
-        r = sn
     except ZeroDivisionError:
-        sn, r = 0.0, 0.0
+        sn = 0.0
     try:
         sp = tn / (fp + tn)
     except ZeroDivisionError:
@@ -47,14 +48,6 @@ def performance(origin_labels, predict_labels, deci_value):
         auc = roc_auc_score(origin_labels, deci_value)
     except ValueError:  # modify in 2020/9/13
         auc = 0.0
-    try:
-        p = tp / (tp + fp)
-    except ZeroDivisionError:
-        p = 0.0
-    try:
-        f1 = 2 * p * r / (p + r)
-    except ZeroDivisionError:
-        f1 = 0.0
     b_acc = (sn + sp) / 2
     # 写入字典
     metric['acc'] = acc
@@ -63,7 +56,36 @@ def performance(origin_labels, predict_labels, deci_value):
     metric['b_acc'] = b_acc
     metric['sn'] = sn
     metric['sp'] = sp
-    metric['p'] = p
-    metric['r'] = r
-    metric['f1'] = f1
     return metric
+
+
+def cal_roc_mu_at(level, y_true):
+    # 统计所有的true positive
+    tp = np.count_nonzero(y_true)
+    # print(tp)
+    # 统计level个false positive之前的tp之和
+    all_fp = np.count_nonzero(~y_true.astype(bool))
+    if all_fp < level:
+        # 如果不足就填充False，因为，没检索出来
+        # fp = all_fp
+        yt_level = y_true
+    else:
+        df = pd.DataFrame(y_true.astype(bool), columns=["label"])
+        fp_index = df.loc[~df.loc[:, "label"]].index[level - 1]
+        yt_level = df.loc[:fp_index].to_numpy(int).reshape((-1,))
+    fp = np.count_nonzero(~yt_level.astype(bool))
+    # print(fp)
+
+    # print(yt_level)
+    cumsum_yt_level = np.cumsum(yt_level)
+    area = cumsum_yt_level[~yt_level.astype(bool)].sum()
+    # print(area)
+    if tp != 0 and fp != 0:
+        roc_at_score = area / (tp * fp)
+    elif tp != 0 and fp == 0:
+        roc_at_score = 1.0
+    elif tp == 0 and fp != 0:
+        roc_at_score = 0.0
+    else:
+        raise Exception("unexpected error")
+    return roc_at_score
