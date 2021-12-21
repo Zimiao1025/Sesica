@@ -119,19 +119,17 @@ def lgb_params_check(tree, num_leaves, gs_mode=0):
     return t_range, n_range
 
 
-def clf_params_control(args):
-    params = {'clf': args.clf, 'top_n': args.top_n, 'metric': args.metric}
-    if args.clf == 'svm':
+def clf_params_control(clf, args, params):
+    if clf == 'svm':
         params['cost'], params['gamma'] = svm_params_check(args.cost, args.gamma, args.gs_mode)
-    elif args.clf in ['rf', 'et']:
+    elif clf in ['rf', 'et']:
         params['n_estimators'] = rt_params_check(args.n_estimators, args.gs_mode)
-    elif args.clf in ['gnb', 'mnb', 'bnb']:
+    elif clf in ['gnb', 'mnb', 'bnb']:
         params['nb_alpha'] = nb_params_check(args.nb_alpha, args.gs_mode)
-    elif args.clf in ['gbdt', 'dart', 'goss']:
-        params['lgb_tree'], params['num_leaves'] = lgb_params_check(args.lgb_tree, args.num_leaves, args.gs_mode)
+    elif clf in ['gbdt', 'dart', 'goss']:
+        params['lgb_tree'], params['num_leaves'] = lgb_params_check(args.n_estimators, args.num_leaves, args.gs_mode)
     else:
         # 不推荐进行遍历
         params['act'] = args.act
         params['hls'] = args.hls
     return params
-

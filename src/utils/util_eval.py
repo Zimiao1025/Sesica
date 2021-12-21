@@ -1,76 +1,22 @@
-import math
 import numpy as np
 import pandas as pd
 
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_curve, auc, precision_recall_curve
 
 
-def performance(origin_labels, predict_labels, deci_value):
-    """evaluations used to evaluate the performance of the model.
-    :param deci_value: decision values used for ROC and AUC.
-    :param origin_labels: true values of the data set.
-    :param predict_labels: predicted values of the data set.
-    """
-    if len(origin_labels) != len(predict_labels):
-        raise ValueError("The number of the original labels must equal to that of the predicted labels.")
-    tp = 0.0
-    tn = 0.0
-    fp = 0.0
-    fn = 0.0
-    metric = {}
-    for i in range(len(origin_labels)):
-        if origin_labels[i] == 1 and predict_labels[i] == 1:
-            tp += 1.0
-        elif origin_labels[i] == 1 and predict_labels[i] == 0:
-            fn += 1.0
-        elif origin_labels[i] == 0 and predict_labels[i] == 1:
-            fp += 1.0
-        elif origin_labels[i] == 0 and predict_labels[i] == 0:
-            tn += 1.0
-
-    try:
-        sn = tp / (tp + fn)
-    except ZeroDivisionError:
-        sn = 0.0
-    try:
-        sp = tn / (fp + tn)
-    except ZeroDivisionError:
-        sp = 0.0
-    try:
-        acc = (tp + tn) / (tp + tn + fp + fn)
-    except ZeroDivisionError:
-        acc = 0.0
-    try:
-        mcc = (tp * tn - fp * fn) / math.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn))
-    except ZeroDivisionError:
-        mcc = 0.0
-    try:
-        auc = roc_auc_score(origin_labels, deci_value)
-    except ValueError:  # modify in 2020/9/13
-        auc = 0.0
-    b_acc = (sn + sp) / 2
-    # 写入字典
-    metric['acc'] = acc
-    metric['mcc'] = mcc
-    metric['auc'] = auc
-    metric['b_acc'] = b_acc
-    metric['sn'] = sn
-    metric['sp'] = sp
-    return metric
-
-
-def cal_roc_mu_at(level, y_true):
+def roc_score(y_true, y_prob, level):
+    y_true_sorted = y_true[np.argsort(-y_prob)]
     # 统计所有的true positive
-    tp = np.count_nonzero(y_true)
+    tp = np.count_nonzero(y_true_sorted)
     # print(tp)
     # 统计level个false positive之前的tp之和
-    all_fp = np.count_nonzero(~y_true.astype(bool))
+    all_fp = np.count_nonzero(~y_true_sorted.astype(bool))
     if all_fp < level:
         # 如果不足就填充False，因为，没检索出来
         # fp = all_fp
-        yt_level = y_true
+        yt_level = y_true_sorted
     else:
-        df = pd.DataFrame(y_true.astype(bool), columns=["label"])
+        df = pd.DataFrame(y_true_sorted.astype(bool), columns=["label"])
         fp_index = df.loc[~df.loc[:, "label"]].index[level - 1]
         yt_level = df.loc[:fp_index].to_numpy(int).reshape((-1,))
     fp = np.count_nonzero(~yt_level.astype(bool))
@@ -89,3 +35,76 @@ def cal_roc_mu_at(level, y_true):
     else:
         raise Exception("unexpected error")
     return roc_at_score
+
+
+def dcg_score(y_true, y_score, k=5):
+    order = np.argsort(y_score)[::-1]
+    y_true = np.take(y_true, order[:k])
+    gain = 2 ** y_true - 1
+    discounts = np.log2(np.arange(len(y_true)) + 2)
+    return np.sum(gain / discounts)
+
+
+def ndcg_score(y_true, y_score, k):
+    dcg = dcg_score(y_true, y_score, k)
+    idcg = dcg_score(y_true, y_true, k)
+    try:
+        ndcg = dcg / idcg
+    except ZeroDivisionError:
+        ndcg = 0.0
+
+    return ndcg
+
+
+def auc_score(true_labels, pred_prob):
+    fpr_ind, tpr_ind, thresholds_ind = roc_curve(true_labels, pred_prob)
+    try:
+        auc_val = auc(fpr_ind, tpr_ind)
+    except ZeroDivisionError:
+        auc_val = 0.0
+
+    return auc_val
+
+
+def aupr_score(true_labels, pred_prob):
+    precision, recall, _ = precision_recall_curve(true_labels, pred_prob)
+    try:
+        aupr_val = auc(recall, precision)
+    except ZeroDivisionError:
+        aupr_val = 0.0
+    return aupr_val
+
+
+def group_eval(metric, y_true, y_prob):
+    # aupr, auc, ndcg@10, roc@1, roc@50
+    if metric == 'aupr':
+        eval_score = aupr_score(y_true, y_prob)
+    elif metric == 'auc':
+        eval_score = auc_score(y_true, y_prob)
+    elif 'ndcg' in metric:
+        k = int(metric.split('@')[1])
+        eval_score = ndcg_score(y_true, y_prob, k)
+    else:
+        k = int(metric.split('@')[1])
+        eval_score = roc_score(y_true, y_prob, k)
+    return eval_score
+
+
+def evaluation(metrics, val_y, val_prob, val_g, file_name):
+    # val_y, val_prob, val_g --> array, array, array
+    count = 0
+    # Evaluate by group and then calculate the mean.
+    eval_res = []
+    for group in val_g:
+        y_true = val_y[count: count + group]
+        y_prob = val_prob[count: count + group]
+
+        group_eval_dict = {}
+        for metric in metrics:
+            group_eval_dict[metric] = group_eval(metric, y_true, y_prob)
+        eval_res.append(group_eval_dict)
+        count += group
+
+    df = pd.DataFrame(eval_res)
+    df.to_csv(file_name)
+    return df.mean().tolist()
