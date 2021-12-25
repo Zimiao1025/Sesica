@@ -17,6 +17,7 @@ def path_check(target_dir):
     #         print("Path '" + target_dir + "' has been created!")
     #     except OSError:
     #         pass
+    return target_dir
 
 
 def path_ctrl(args):
@@ -24,14 +25,25 @@ def path_ctrl(args):
     print("*Note that all files and models will be generated in the 'result' directory!!!\n")
     args.res_dir = args.base_dir + 'result/'
     # create directory for processed input data
-    args.data_dir = args.res_dir + 'bmk_data/'
-    path_check(args.data_dir)
+    args.data_dir = path_check(args.res_dir + 'bmk_data/')
     # create directory for each classifier
+    args.ssc_path = {}
     if args.clf != 'none':
         args.clf_path = {}
         for clf in args.clf:
-            args.clf_path[clf] = args.res_dir + clf + '/'
-            path_check(args.clf_path[clf])
+            args.clf_path[clf] = path_check(args.res_dir + clf + '/')
+            args.ssc_path[clf] = args.res_dir + clf + '/'
+    # create directory for each deep-learning arc
+    if args.arc != 'none':
+        args.arc_path = {}
+        for arc in args.arc:
+            args.arc_path[arc] = path_check(args.res_dir + arc + '/')
+            args.ssc_path[arc] = args.res_dir + arc + '/'
+
+    if args.integrate == 'none':
+        args.no_int_path = path_check(args.res_dir + 'no_int/')
+    else:
+        args.int_path = path_check(args.res_dir + args.integrate + '_int/')
 
     return args
 
@@ -59,13 +71,7 @@ def top_n_ctrl(clf, top_n):
     return top_n_10
 
 
-def file_ctrl(prefix_list, file_path):
-    file_list = os.listdir(file_path)
-    for prefix in prefix_list:
-        for file_name in file_list:
-            if prefix not in file_name:
-                try:
-                    os.remove(file_path+file_name)
-                except OSError:
-                    pass
-                file_list.remove(file_name)
+def make_clf_pk():
+    return {'svm': ['svm_c', 'svm_g'], 'rf': ['rf_t'], 'ert': ['ert_t'], 'mnb': ['mnb_a'], 'bnb': ['bnb_a'],
+            'gnb': ['none'], 'gbdt': ['gbdt_n', 'gbdt_t'], 'dart': ['dart_n', 'dart_t'], 'goss': ['goss_n', 'goss_t'],
+            'mlp': ['act', 'hls']}

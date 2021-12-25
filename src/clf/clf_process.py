@@ -21,14 +21,15 @@ def clf_train(args):
     valid_y = np.load(args.data_dir + 'valid_y.npy')
     valid_g = np.load(args.data_dir + 'valid_g.npy')
 
-    params = {'top_n': util_ctrl.top_n_ctrl(args.clf, args.top_n), 'metrics': args.metrics}
+    params = {'top_n': util_ctrl.top_n_ctrl(args.clf, args.top_n), 'metrics': args.metrics,
+              'param_keys': util_ctrl.make_clf_pk()}
 
     for clf in args.clf:
         params = util_params.clf_params_control(clf, args, params)
 
         if clf == 'svm':
             svm_train(train_x, train_y, valid_x, valid_y, valid_g, args.clf_path[clf], params)
-        elif clf in ['rf', 'et']:
+        elif clf in ['rf', 'ert']:
             rt_train(clf, train_x, train_y, valid_x, valid_y, valid_g, args.clf_path[clf], params)
         elif clf in ['gnb', 'mnb', 'bnb']:
             nb_train(clf, train_x, train_y, valid_x, valid_y, valid_g, args.clf_path[clf], params)
@@ -40,8 +41,8 @@ def clf_train(args):
 
 def clf_test(args):
     test_x = np.load(args.data_dir + 'test_x.npy')
-    test_y = np.load(args.data_dir + 'test_y.npy')
-    test_g = np.load(args.data_dir + 'test_g.npy')
+    # test_y = np.load(args.data_dir + 'test_y.npy')
+    # test_g = np.load(args.data_dir + 'test_g.npy')
     prob_dict = {}
     for clf in args.clf:
         model_path = args.clf_path[clf]
@@ -51,11 +52,10 @@ def clf_test(args):
                 model = joblib.load(model_path + file_name)
                 test_prob = model.predict_proba(test_x)[:, 1]
                 prob_dict[top_n] = test_prob
-                metric_list = util_eval.evaluation(args.metrics, test_y, test_prob, test_g,
-                                                   model_path + os.path.splitext(file_name)[0] + '_test_eval.csv')
-                print(' Test '.center(36, '*'))
-                print('Evaluation on test dataset: ', metric_list[0])
-                print('\n')
+                # metric_df = util_eval.evaluation(args.metrics, test_y, test_prob, test_g)
+                # metric_df.to_csv(top_n + '_eval_results.csv')
+                # metric_list = metric_df.mean().tolist()
+                # print('Testing result of %s model: %s = %.4f\n' % (top_n, args.metrics[0], metric_list[0]))
 
         df = pd.DataFrame(prob_dict)
         df.to_csv(model_path + 'test_prob.csv')
@@ -74,11 +74,10 @@ def clf_predict(args):
                 model = joblib.load(model_path + file_name)
                 test_prob = model.predict_proba(test_x)[:, 1]
                 prob_dict[top_n] = test_prob
-                metric_list = util_eval.evaluation(args.metrics, test_y, test_prob, test_g,
-                                                   model_path + os.path.splitext(file_name)[0] + '_ind_eval.csv')
-                print(' Ind Test '.center(36, '*'))
-                print('Evaluation on independent test dataset: ', metric_list[0])
-                print('\n')
+                metric_df = util_eval.evaluation(args.metrics, test_y, test_prob, test_g)
+                metric_df.to_csv(top_n + '_ind_results.csv')
+                metric_list = metric_df.mean().tolist()
+                print('Independent test result of %s model: %s = %.4f\n' % (top_n, args.metrics[0], metric_list[0]))
 
         df = pd.DataFrame(prob_dict)
         df.to_csv(model_path + 'ind_prob.csv')

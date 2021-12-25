@@ -2,7 +2,8 @@ from collections import defaultdict
 
 import numpy as np
 
-from clf import clf_process
+# from clf import clf_process
+from integrate import integration
 from utils import util_data, util_ctrl
 
 
@@ -126,7 +127,8 @@ def main(args):
     args = util_ctrl.path_ctrl(args)
     # hetero_bmk(args)
     # clf_process.clf_train(args)
-    clf_process.clf_test(args)
+    # clf_process.clf_test(args)
+    integration.int_or_rank(args)
 
 
 if __name__ == '__main__':
@@ -140,8 +142,17 @@ if __name__ == '__main__':
                        help="The input files for positive and negative associations.")
 
     parse.add_argument('-clf', type=str, nargs='*',
-                       choices=['svm', 'rf', 'et', 'gnb', 'mnb', 'bnb', 'gbdt', 'dart', 'goss', 'mlp'],
-                       help="The machine learning algorithm, for example: Support Vector Machine(svm).")
+                       choices=['svm', 'rf', 'ert', 'gnb', 'mnb', 'bnb', 'gbdt', 'dart', 'goss', 'mlp', 'none'],
+                       default='none',
+                       help="The methods of calculating semantic similarity based on probability distribution:\n"
+                            " 'svm' --- Support Vector Machine; 'rf' --- Random Forest;\n"
+                            " 'ert' --- extremely randomized tree; 'gnb' --- Gaussian Naive Bayes;\n"
+                            " 'mnb' --- Multinomial Naive Bayes; 'bnb' --- Bernoulli Naive Bayes;\n"
+                            " 'gbdt' --- traditional Gradient Boosting Decision Tree;\n"
+                            " 'dart' --- Dropouts meet Multiple Additive Regression Trees;\n"
+                            " 'goss' --- Gradient-based One-Side Sampling;\n"
+                            " 'mlp' --- Multi-layer Perceptron.\n"
+                       )
     # parameters for no grid search
     parse.add_argument('-gs_mode', type=int, choices=[0, 1, 2], default=0,
                        help="grid = 0 for no grid search, 1 for rough grid search, 2 for meticulous grid search.")
@@ -150,22 +161,50 @@ if __name__ == '__main__':
     parse.add_argument('-top_n', type=int, nargs='*', default=[1],
                        help="Select the n best scores for specific metric.")
     # parameters for svm
-    parse.add_argument('-cost', type=int, default=[0], nargs='*', help="Regularization parameter of 'SVM'.")
-    parse.add_argument('-gamma', type=int, default=[1], nargs='*', help="Kernel coefficient for 'rbf' of 'SVM'.")
-    # parameters for rf and et and lgb
-    parse.add_argument('-n_estimators', type=int, default=[100], nargs='*',
-                       help="Number of boosted trees to fit.")
-    # parameters for nb
-    parse.add_argument('-nb_alpha', type=float, nargs='*', default=[1.0],
+    parse.add_argument('-svm_c', type=int, default=[0], nargs='*', help="Regularization parameter of 'SVM'.")
+    parse.add_argument('-svm_g', type=int, default=[1], nargs='*', help="Kernel coefficient for 'rbf' of 'SVM'.")
+    # parameters for rf
+    parse.add_argument('-rf_t', type=int, default=[100], nargs='*', help="Number of boosted trees to fit.")
+    # parameters for ert
+    parse.add_argument('-ert_t', type=int, default=[100], nargs='*', help="Number of boosted trees to fit.")
+    # parameters for mnb
+    parse.add_argument('-mnb_a', type=float, nargs='*', default=[1.0],
                        help="The Additive (Laplace/Lidstone) smoothing parameter for Naive Bayes classifier.")
-    # parameters for lgb
-    parse.add_argument('-num_leaves', type=int, default=[31], nargs='*', help="Maximum tree leaves for base learners.")
+    # parameters for bnb
+    parse.add_argument('-bnb_a', type=float, nargs='*', default=[1.0],
+                       help="The Additive (Laplace/Lidstone) smoothing parameter for Naive Bayes classifier.")
+    # parameter for gnb is none!
+    # parameters for gbdt
+    parse.add_argument('-gbdt_t', type=int, default=[100], nargs='*', help="Number of boosted trees to fit.")
+    parse.add_argument('-gbdt_n', type=int, default=[31], nargs='*', help="Maximum tree leaves for base learners.")
+    # parameters for dart
+    parse.add_argument('-dart_t', type=int, default=[100], nargs='*', help="Number of boosted trees to fit.")
+    parse.add_argument('-dart_n', type=int, default=[31], nargs='*', help="Maximum tree leaves for base learners.")
+    # parameters for goss
+    parse.add_argument('-goss_t', type=int, default=[100], nargs='*', help="Number of boosted trees to fit.")
+    parse.add_argument('-goss_n', type=int, default=[31], nargs='*', help="Maximum tree leaves for base learners.")
     # parameters for mlp
     parse.add_argument('-act', type=str, nargs='*', choices=['logistic', 'tanh', 'relu'], default=['relu'],
                        help="Activation function for the hidden layer.")
     parse.add_argument('-hls', default=[(100,)], nargs='*',
                        help="Hidden layer sizes. The ith element represents the number of neurons in the ith hidden "
                             "layer.")
-
+    # parameters for integration
+    parse.add_argument('-integrate', type=str, choices=['de', 'ga', 'lr', 'ltr', 'none'], default='none',
+                       help="Integrate by:\n"
+                            " 'none' --- Without integration, the output is sorted directly according to the metric;\n"
+                            " 'de' --- differential evolution; 'ga' --- genetic algorithm;\n"
+                            " 'lr' --- logistic regression; 'ltr' --- Learning to rank with LambdaRank.\n"
+                       )
+    # parameters for de and ga
+    parse.add_argument('-size_pop', type=int, default=100, help="Population size for 'DE' or 'GA'.")
+    parse.add_argument('-max_iter', type=int, default=1000, help="Max iterations for 'DE' or 'GA'.")
+    # parameters for lr
+    parse.add_argument('-lr_c', type=int, default=[0], nargs='*', help="Regularization parameter of 'LR'.")
+    # parameters for ltr
+    parse.add_argument('-ltr_m', type=int, default=[0], nargs='*',
+                       help="Maximum tree depth for base learners, <=0 means no limit.")
+    parse.add_argument('-ltr_t', type=int, default=[100], nargs='*', help="Number of boosted trees to fit.")
+    parse.add_argument('-ltr_n', type=int, default=[31], nargs='*', help="Maximum tree leaves for base learners.")
     argv = parse.parse_args()
     main(argv)

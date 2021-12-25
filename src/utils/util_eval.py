@@ -90,7 +90,7 @@ def group_eval(metric, y_true, y_prob):
     return eval_score
 
 
-def evaluation(metrics, val_y, val_prob, val_g, file_name):
+def evaluation(metrics, val_y, val_prob, val_g):
     # val_y, val_prob, val_g --> array, array, array
     count = 0
     # Evaluate by group and then calculate the mean.
@@ -106,5 +106,15 @@ def evaluation(metrics, val_y, val_prob, val_g, file_name):
         count += group
 
     df = pd.DataFrame(eval_res)
-    df.to_csv(file_name)
-    return df.mean().tolist()
+    return df
+
+
+def save_params(top_n, results, param_keys, model_path):
+    param_list = []
+    for i in range(top_n):
+        tmp_dict = {'top_n': i + 1}
+        for param_key, param_val in zip(param_keys, results[i][0]):
+            tmp_dict[param_key] = param_val
+        param_list.append(tmp_dict)
+    params_df = pd.DataFrame(param_list)
+    params_df.to_csv(model_path + 'params.csv')

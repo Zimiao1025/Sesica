@@ -11,7 +11,7 @@ def svm_params_check(cost, gamma, gs_mode=0):  # 2: meticulous; 1: 'rough'; 0: '
         elif len(cost) == 3:
             c_range = range(cost[0], cost[1] + 1, cost[2])
         else:
-            error_info = 'The number of input value of parameter "cost" should be no more than 3!'
+            error_info = 'The number of input value of parameter "svm_c" should be no more than 3!'
             sys.stderr.write(error_info)
             return False
     elif gs_mode == 1:
@@ -27,7 +27,7 @@ def svm_params_check(cost, gamma, gs_mode=0):  # 2: meticulous; 1: 'rough'; 0: '
         elif len(gamma) == 3:
             g_range = range(gamma[0], gamma[1] + 1, gamma[2])
         else:
-            error_info = 'The number of input value of parameter "gamma" should be no more than 3!'
+            error_info = 'The number of input value of parameter "svm_g" should be no more than 3!'
             sys.stderr.write(error_info)
             return False
 
@@ -48,7 +48,7 @@ def rt_params_check(tree, gs_mode=0):
         elif len(tree) == 3:
             t_range = range(tree[0], tree[1] + 100, tree[2])
         else:
-            error_info = 'The number of input value of parameter "n_estimators" should be no more than 3!'
+            error_info = 'The number of input value of parameter "rt_t/ert_t" should be no more than 3!'
             sys.stderr.write(error_info)
             return False
     elif gs_mode == 1:
@@ -72,7 +72,7 @@ def nb_params_check(alpha, gs_mode=0):
         elif len(alpha) == 3:
             alpha_range = f_range(alpha[0], alpha[1] + 0.1, alpha[2])
         else:
-            error_info = 'The number of input value of parameter "rf_tree" should be no more than 3!'
+            error_info = 'The number of input value of parameter "mnb_a/bnb_a" should be no more than 3!'
             sys.stderr.write(error_info)
             return False
     elif gs_mode == 1:
@@ -92,7 +92,104 @@ def lgb_params_check(tree, num_leaves, gs_mode=0):
         elif len(tree) == 3:
             t_range = range(tree[0], tree[1] + 100, tree[2])
         else:
-            error_info = 'The number of input value of parameter "rf_tree" should be no more than 3!'
+            error_info = 'The number of input value of parameter "gbdt_t/dart_t/goss_t" should be no more than 3!'
+            sys.stderr.write(error_info)
+            return False
+    elif gs_mode == 1:
+        t_range = range(100, 600, 100)
+    else:
+        t_range = range(100, 600, 200)
+
+    if gs_mode == 0:
+        if len(num_leaves) == 1:
+            n_range = range(num_leaves[0], num_leaves[0] + 100, 100)
+        elif len(num_leaves) == 2:
+            n_range = range(num_leaves[0], num_leaves[1] + 100, 100)
+        elif len(num_leaves) == 3:
+            n_range = range(num_leaves[0], num_leaves[1] + 100, num_leaves[2])
+        else:
+            error_info = 'The number of input value of parameter "gbdt_n/dart_n/goss_n" should be no more than 3!'
+            sys.stderr.write(error_info)
+            return False
+    elif gs_mode == 1:
+        n_range = [31, 63, 127, 255, 511, 1025]
+    else:
+        n_range = [31, 63, 127, 255]
+
+    return t_range, n_range
+
+
+def clf_params_control(clf, args, params):
+    if clf == 'svm':
+        params['svm_c'], params['svm_g'] = svm_params_check(args.svm_c, args.svm_c, args.gs_mode)
+    elif clf == 'rf':
+        params['rf_t'] = rt_params_check(args.rf_t, args.gs_mode)
+    elif clf == 'ert':
+        params['ert_t'] = rt_params_check(args.rf_t, args.gs_mode)
+    elif clf == 'gnb':
+        params['gnb_a'] = [1.0]
+    elif clf == 'mnb':
+        params['mnb_a'] = nb_params_check(args.mnb_a, args.gs_mode)
+    elif clf == 'bnb':
+        params['bnb_a'] = nb_params_check(args.bnb_a, args.gs_mode)
+    elif clf == 'gbdt':
+        params['gbdt_t'], params['gbdt_n'] = lgb_params_check(args.gbdt_t, args.gbdt_n, args.gs_mode)
+    elif clf == 'dart':
+        params['dart_t'], params['dart_n'] = lgb_params_check(args.dart_t, args.dart_n, args.gs_mode)
+    elif clf == 'goss':
+        params['goss_t'], params['goss_n'] = lgb_params_check(args.goss_t, args.goss_n, args.gs_mode)
+    else:
+        # 不推荐进行遍历
+        params['act'] = args.act
+        params['hls'] = args.hls
+    return params
+
+
+def lr_params_check(cost, gs_mode=0):  # 2: meticulous; 1: 'rough'; 0: 'none'.
+    if gs_mode == 0:
+        if len(cost) == 1:
+            c_range = range(cost[0], cost[0] + 1, 1)
+        elif len(cost) == 2:
+            c_range = range(cost[0], cost[1] + 1, 1)
+        elif len(cost) == 3:
+            c_range = range(cost[0], cost[1] + 1, cost[2])
+        else:
+            error_info = 'The number of input value of parameter "lr_c" should be no more than 3!'
+            sys.stderr.write(error_info)
+            return False
+    elif gs_mode == 1:
+        c_range = range(-5, 11, 3)
+    else:
+        c_range = range(-5, 11, 1)
+
+    return c_range
+
+
+def ltr_params_check(max_depth, n_estimators, num_leaves, gs_mode=0):
+    if gs_mode == 0:
+        if len(max_depth) == 1:
+            m_range = range(max_depth[0], max_depth[0] + 1, 1)
+        elif len(max_depth) == 2:
+            m_range = range(max_depth[0], max_depth[1] + 1, 1)
+        elif len(max_depth) == 3:
+            m_range = range(max_depth[0], max_depth[1] + 1, max_depth[2])
+        else:
+            error_info = 'The number of input value of parameter "ltr_t" should be no more than 3!'
+            sys.stderr.write(error_info)
+            return False
+    elif gs_mode == 1:
+        m_range = range(0, 7, 2)
+    else:
+        m_range = range(0, 10, 1)
+    if gs_mode == 0:
+        if len(n_estimators) == 1:
+            t_range = range(n_estimators[0], n_estimators[0] + 100, 100)
+        elif len(n_estimators) == 2:
+            t_range = range(n_estimators[0], n_estimators[1] + 100, 100)
+        elif len(n_estimators) == 3:
+            t_range = range(n_estimators[0], n_estimators[1] + 100, n_estimators[2])
+        else:
+            error_info = 'The number of input value of parameter "ltr_t" should be no more than 3!'
             sys.stderr.write(error_info)
             return False
     elif gs_mode == 1:
@@ -112,24 +209,21 @@ def lgb_params_check(tree, num_leaves, gs_mode=0):
             sys.stderr.write(error_info)
             return False
     elif gs_mode == 1:
-        n_range = [31, 63, 127, 255, 511]
+        n_range = [31, 63, 127, 255, 511, 1025]
     else:
-        n_range = [31, 63, 127]
+        n_range = [31, 63, 127, 255]
 
-    return t_range, n_range
+    return m_range, t_range, n_range
 
 
-def clf_params_control(clf, args, params):
-    if clf == 'svm':
-        params['cost'], params['gamma'] = svm_params_check(args.cost, args.gamma, args.gs_mode)
-    elif clf in ['rf', 'et']:
-        params['n_estimators'] = rt_params_check(args.n_estimators, args.gs_mode)
-    elif clf in ['gnb', 'mnb', 'bnb']:
-        params['nb_alpha'] = nb_params_check(args.nb_alpha, args.gs_mode)
-    elif clf in ['gbdt', 'dart', 'goss']:
-        params['lgb_tree'], params['num_leaves'] = lgb_params_check(args.n_estimators, args.num_leaves, args.gs_mode)
+def int_params_control(int_method, args, params):
+    if int_method == 'lr':
+        params['lr_c'] = lr_params_check(args.lr_c, args.gs_mode)
+    elif int_method == 'ltr':
+        params['ltr_m'], params['ltr_t'], params['ltr_n'] = ltr_params_check(args.ltr_m, args.ltr_t, args.ltr_n,
+                                                                             args.gs_mode)
     else:
         # 不推荐进行遍历
-        params['act'] = args.act
-        params['hls'] = args.hls
+        params['size_pop'] = args.size_pop
+        params['max_iter'] = args.max_iter
     return params
