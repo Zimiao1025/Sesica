@@ -40,38 +40,38 @@ def rank_out_ind(args):
     metric_pd.to_csv(args.no_int_path + 'final_result_ind.csv')
 
 
-def int_train(args):
+def int_train(args, params):
     train_x = []
     valid_x = []
     for clf in args.clf:
         model_path = args.ssc_path[clf]
         valid_prob = pd.read_csv(model_path + 'valid_prob.csv', dtype=np.float)
-        train_x.append(valid_prob)
+        train_x.append(valid_prob.values[:, 1:].flatten())
         test_prob = pd.read_csv(model_path + 'test_prob.csv', dtype=np.float)
-        valid_x.append(test_prob)
+        valid_x.append(test_prob.values[:, 1:].flatten())
 
     # training dataset
-    train_x = np.array(train_x)
+    train_x = np.array(train_x).transpose()
+    np.save(args.int_path + 'int_train_x.npy', train_x)
     train_y = np.load(args.data_dir + 'valid_y.npy')
     train_g = np.load(args.data_dir + 'valid_g.npy')
     # validation dataset
-    valid_x = np.array(valid_x)
+    valid_x = np.array(valid_x).transpose()
+    np.save(args.int_path + 'int_valid_x.npy', valid_x)
     valid_y = np.load(args.data_dir + 'test_y.npy')
     valid_g = np.load(args.data_dir + 'test_g.npy')
 
     print('Start integration......\n')
     int_method = args.integrate
-    params = {'metrics': args.metrics}
 
     params = util_params.int_params_control(int_method, args, params)
 
-    if int_method in ['de', 'ga']:
-        weight_mean(int_method, train_x, train_y, train_g, args.int_path[int_method], params)
+    if int_method in ['da', 'de']:
+        weight_mean(int_method, train_x, train_y, train_g, args.int_path, params)
     elif int_method == 'lr':
-        lr_train(train_x, train_y, valid_x, valid_y, valid_g, args.int_path[int_method], params)
+        lr_train(train_x, train_y, valid_x, valid_y, valid_g, args.int_path, params)
     elif int_method == 'ltr':
-        ltr_train(train_x, train_y, train_g, valid_x, valid_y, valid_g, args.int_path[int_method], params)
-    # else:
+        ltr_train(train_x, train_y, train_g, valid_x, valid_y, valid_g, args.int_path, params)
 
 
 def int_predict(args):
@@ -96,11 +96,11 @@ def int_predict(args):
         df.to_csv(model_path + 'ind_prob.csv')
 
 
-def int_or_rank(args):
+def int_or_rank(args, params):
     if args.integrate == 'none':
         rank_out(args)
     else:
-        int_train(args)
+        int_train(args, params)
 
 
 def int_or_rank_ind(args):

@@ -12,7 +12,7 @@ from clf.svm_impl import svm_train
 from utils import util_params, util_ctrl, util_eval
 
 
-def clf_train(args):
+def clf_train(args, params):
     # training dataset
     train_x = np.load(args.data_dir + 'train_x.npy')
     train_y = np.load(args.data_dir + 'train_y.npy')
@@ -20,9 +20,6 @@ def clf_train(args):
     valid_x = np.load(args.data_dir + 'valid_x.npy')
     valid_y = np.load(args.data_dir + 'valid_y.npy')
     valid_g = np.load(args.data_dir + 'valid_g.npy')
-
-    params = {'top_n': util_ctrl.top_n_ctrl(args.clf, args.top_n), 'metrics': args.metrics,
-              'param_keys': util_ctrl.make_clf_pk()}
 
     for clf in args.clf:
         params = util_params.clf_params_control(clf, args, params)
@@ -35,7 +32,7 @@ def clf_train(args):
             nb_train(clf, train_x, train_y, valid_x, valid_y, valid_g, args.clf_path[clf], params)
         elif clf in ['gbdt', 'dart', 'goss']:
             lgb_train(clf, train_x, train_y, valid_x, valid_y, valid_g, args.clf_path[clf], params)
-        else:
+        elif clf == 'mlp':
             mlp_train(train_x, train_y, valid_x, valid_y, valid_g, args.clf_path[clf], params)
 
 

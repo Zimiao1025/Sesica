@@ -126,9 +126,10 @@ def main(args):
     print("\n******************************** Analysis ********************************\n")
     args = util_ctrl.path_ctrl(args)
     # hetero_bmk(args)
+    params = util_ctrl.params_base(args)
     # clf_process.clf_train(args)
     # clf_process.clf_test(args)
-    integration.int_or_rank(args)
+    integration.int_or_rank(args, params)
 
 
 if __name__ == '__main__':
@@ -152,6 +153,18 @@ if __name__ == '__main__':
                             " 'dart' --- Dropouts meet Multiple Additive Regression Trees;\n"
                             " 'goss' --- Gradient-based One-Side Sampling;\n"
                             " 'mlp' --- Multi-layer Perceptron.\n"
+                       )
+    parse.add_argument('-arc', type=str, nargs='*',
+                       choices=['svm', 'rf', 'ert', 'gnb', 'mnb', 'bnb', 'gbdt', 'dart', 'goss', 'mlp', 'none'],
+                       default='none',
+                       help="The methods of calculating semantic similarity based on probability distribution:\n"
+                            " 'svm'  --- Support Vector Machine; 'rf' --- Random Forest;\n"
+                            " 'ert'  --- extremely randomized tree; 'gnb' --- Gaussian Naive Bayes;\n"
+                            " 'mnb'  --- Multinomial Naive Bayes; 'bnb' --- Bernoulli Naive Bayes;\n"
+                            " 'gbdt' --- traditional Gradient Boosting Decision Tree;\n"
+                            " 'dart' --- Dropouts meet Multiple Additive Regression Trees;\n"
+                            " 'goss' --- Gradient-based One-Side Sampling;\n"
+                            " 'mlp'  --- Multi-layer Perceptron.\n"
                        )
     # parameters for no grid search
     parse.add_argument('-gs_mode', type=int, choices=[0, 1, 2], default=0,
@@ -197,8 +210,8 @@ if __name__ == '__main__':
                             " 'lr' --- logistic regression; 'ltr' --- Learning to rank with LambdaRank.\n"
                        )
     # parameters for de and ga
-    parse.add_argument('-size_pop', type=int, default=100, help="Population size for 'DE' or 'GA'.")
-    parse.add_argument('-max_iter', type=int, default=1000, help="Max iterations for 'DE' or 'GA'.")
+    parse.add_argument('-size_pop', type=int, default=10, help="Population size for 'DE' or 'GA'.")
+    parse.add_argument('-max_iter', type=int, default=100, help="Max iterations for 'DE' or 'GA'.")
     # parameters for lr
     parse.add_argument('-lr_c', type=int, default=[0], nargs='*', help="Regularization parameter of 'LR'.")
     # parameters for ltr

@@ -224,6 +224,6 @@ def int_params_control(int_method, args, params):
                                                                              args.gs_mode)
     else:
         # 不推荐进行遍历
-        params['size_pop'] = args.size_pop
+        params['pop_size'] = args.pop_size
         params['max_iter'] = args.max_iter
     return params

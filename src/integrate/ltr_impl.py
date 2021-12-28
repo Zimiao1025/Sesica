@@ -9,7 +9,7 @@ def ltr_train(train_x, train_y, train_g, val_x, val_y, val_g, int_path, params):
     # get num_leaves and tree
     n_range = params['ltr_n']  # num_leaves
     t_range = params['ltr_t']  # n_estimators
-    m_range = params['ltr_ma']  # max_depth
+    m_range = params['ltr_m']  # max_depth
     # boosting_type = params['boosting_type']  # 'gbdt', 'dart', 'goss'
     metric_dict = {}
     for m in m_range:
@@ -31,7 +31,7 @@ def ltr_train(train_x, train_y, train_g, val_x, val_y, val_g, int_path, params):
     hp = results_order[0][0]
     gbm = lgb(boosting_type='dart', random_state=1025, max_depth=hp[0], num_leaves=hp[1], n_estimators=hp[2])
     gbm.fit(train_x, train_y, eval_set=[(val_x, val_y)], group=train_g, eval_group=[val_g])
-    joblib.dump(gbm, int_path + 'ltr_m' + str(hp[0]) + '_n_' + str(hp[1]) + '_t_' + str(hp[2]) + '_model.pkl')
+    joblib.dump(gbm, int_path + 'ltr_m_' + str(hp[0]) + '_n_' + str(hp[1]) + '_t_' + str(hp[2]) + '_model.pkl')
     val_prob = gbm.predict(val_x)
     np.save(int_path + 'prob.npy', val_prob)
     # metric: auc, aupr, ndcg@k, roc@k

@@ -62,16 +62,28 @@ def sp_ctrl(associations):
     return sp_associations
 
 
-def top_n_ctrl(clf, top_n):
+def top_n_ctrl(clf, arc, top_n):
+    # top_n_order = [clf, arc]  ----  top --> list
     count = 0
     tmp_len = len(top_n)
     top_n_10 = {}
-    for ml in clf:
-        top_n_10[ml] = top_n[++count] if tmp_len >= count else 1
+    if clf != 'none':
+        for ml in clf:
+            top_n_10[ml] = top_n[++count] if tmp_len >= count else 1
+    if arc != 'none':
+        for dl in arc:
+            top_n_10[dl] = top_n[++count] if tmp_len >= count else 1
     return top_n_10
 
 
 def make_clf_pk():
+    # 不一定只是clf, 后续扩展
     return {'svm': ['svm_c', 'svm_g'], 'rf': ['rf_t'], 'ert': ['ert_t'], 'mnb': ['mnb_a'], 'bnb': ['bnb_a'],
             'gnb': ['none'], 'gbdt': ['gbdt_n', 'gbdt_t'], 'dart': ['dart_n', 'dart_t'], 'goss': ['goss_n', 'goss_t'],
             'mlp': ['act', 'hls']}
+
+
+def params_base(args):
+    params = {'top_n': top_n_ctrl(args.clf, args.arc, args.top_n), 'metrics': args.metrics,
+              'param_keys': make_clf_pk()}
+    return params

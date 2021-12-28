@@ -20,7 +20,7 @@ def lr_train(train_x, train_y, val_x, val_y, val_g, int_path, params):
         metric_df = evaluation(params['metrics'], val_y, val_prob, val_g)
         metric_list = metric_df.mean().tolist()
         print('Evaluation on validation dataset for integrating: %s = %.4f\n' % (params['metrics'][0], metric_list[0]))
-        metric_dict[c] = metric_list
+        metric_dict[(c,)] = metric_list
     # sort from large to small
     results_order = sorted(metric_dict.items(), key=lambda x: x[1], reverse=True)
     # select best model
