@@ -4,12 +4,14 @@ import joblib
 import numpy as np
 import pandas as pd
 
+from clf.knn_impl import knn_train
 from clf.lgb_impl import lgb_train
 from clf.mlp_impl import mlp_train
 from clf.nb_impl import nb_train
 from clf.rt_impl import rt_train
+from clf.sgd_impl import sgd_train
 from clf.svm_impl import svm_train
-from utils import util_params, util_ctrl, util_eval
+from utils import util_params, util_eval
 
 
 def clf_train(args, params):
@@ -26,10 +28,14 @@ def clf_train(args, params):
 
         if clf == 'svm':
             svm_train(train_x, train_y, valid_x, valid_y, valid_g, args.clf_path[clf], params)
+        elif clf == 'knn':
+            knn_train(train_x, train_y, valid_x, valid_y, valid_g, args.clf_path[clf], params)
+        elif clf == 'sgd':
+            sgd_train(train_x, train_y, valid_x, valid_y, valid_g, args.clf_path[clf], params)
         elif clf in ['rf', 'ert']:
             rt_train(clf, train_x, train_y, valid_x, valid_y, valid_g, args.clf_path[clf], params)
-        elif clf in ['gnb', 'mnb', 'bnb']:
-            nb_train(clf, train_x, train_y, valid_x, valid_y, valid_g, args.clf_path[clf], params)
+        elif clf == 'mnb':
+            nb_train(train_x, train_y, valid_x, valid_y, valid_g, args.clf_path[clf], params)
         elif clf in ['gbdt', 'dart', 'goss']:
             lgb_train(clf, train_x, train_y, valid_x, valid_y, valid_g, args.clf_path[clf], params)
         elif clf == 'mlp':

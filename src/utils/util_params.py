@@ -59,11 +59,51 @@ def rt_params_check(tree, gs_mode=0):
     return t_range
 
 
+def knn_params_check(num, gs_mode=0):
+    if gs_mode == 0:
+        if len(num) == 1:
+            n_range = range(num[0], num[0] + 10, 10)
+        elif len(num) == 2:
+            n_range = range(num[0], num[1] + 10, 10)
+        elif len(num) == 3:
+            n_range = range(num[0], num[1] + 10, num[2])
+        else:
+            error_info = 'The number of input value of parameter "knn_n" should be no more than 3!'
+            sys.stderr.write(error_info)
+            return False
+    elif gs_mode == 1:
+        n_range = [1, 5, 10, 20, 50, 100, 200]
+    else:
+        n_range = [5, 10, 20, 50, 100]
+
+    return n_range
+
+
+def sgd_params_check(epoch, gs_mode=0):
+    if gs_mode == 0:
+        if len(epoch) == 1:
+            e_range = range(epoch[0], epoch[0] + 500, 500)
+        elif len(epoch) == 2:
+            e_range = range(epoch[0], epoch[1] + 500, 500)
+        elif len(epoch) == 3:
+            e_range = range(epoch[0], epoch[1] + 500, epoch[2])
+        else:
+            error_info = 'The number of input value of parameter "knn_n" should be no more than 3!'
+            sys.stderr.write(error_info)
+            return False
+    elif gs_mode == 1:
+        e_range = [100, 500, 1000, 1500, 2000, 2500]
+    else:
+        e_range = [500, 1000, 1500]
+
+    return e_range
+
+
 def f_range(start, stop, step):
     return takewhile(lambda x: x < stop, count(start, step))
 
 
-def nb_params_check(alpha, gs_mode=0):
+def mnb_params_check(alpha, gs_mode=0):
     if gs_mode == 0:
         if len(alpha) == 1:
             alpha_range = f_range(alpha[0], alpha[0] + 0.1, 0.1)
@@ -126,12 +166,12 @@ def clf_params_control(clf, args, params):
         params['rf_t'] = rt_params_check(args.rf_t, args.gs_mode)
     elif clf == 'ert':
         params['ert_t'] = rt_params_check(args.rf_t, args.gs_mode)
-    elif clf == 'gnb':
-        params['gnb_a'] = [1.0]
+    elif clf == 'knn':
+        params['knn_n'] = knn_params_check(args.knn_n, args.gs_mode)
     elif clf == 'mnb':
-        params['mnb_a'] = nb_params_check(args.mnb_a, args.gs_mode)
-    elif clf == 'bnb':
-        params['bnb_a'] = nb_params_check(args.bnb_a, args.gs_mode)
+        params['mnb_a'] = mnb_params_check(args.mnb_a, args.gs_mode)
+    elif clf == 'sgd':
+        params['sgd_m'] = sgd_params_check(args.sgd_m, args.gs_mode)
     elif clf == 'gbdt':
         params['gbdt_t'], params['gbdt_n'] = lgb_params_check(args.gbdt_t, args.gbdt_n, args.gs_mode)
     elif clf == 'dart':
@@ -140,8 +180,8 @@ def clf_params_control(clf, args, params):
         params['goss_t'], params['goss_n'] = lgb_params_check(args.goss_t, args.goss_n, args.gs_mode)
     else:
         # 不推荐进行遍历
-        params['act'] = args.act
-        params['hls'] = args.hls
+        params['act'] = [args.act]
+        params['hls'] = [tuple(args.hls)]
     return params
 
 

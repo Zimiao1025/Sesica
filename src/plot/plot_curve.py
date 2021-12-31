@@ -1,19 +1,19 @@
-import os
-
 import matplotlib.pyplot as plt
 from sklearn.metrics import precision_recall_curve
-from sklearn.metrics import roc_curve, auc
+from sklearn.metrics import roc_curve
 
 
-def ro_curve(true_labels, pred_prob, file_path):
-    fpr_ind, tpr_ind, thresholds_ind = roc_curve(true_labels, pred_prob)
-    try:
-        ind_auc = auc(fpr_ind, tpr_ind)
-    except ZeroDivisionError:
-        ind_auc = 0.0
+def plot_roc(true_y, prob_dict, auc_dict, fig_path):
     plt.figure(0)
-    plt.plot(fpr_ind, tpr_ind, lw=2, alpha=0.7, color='red',
-             label='ROC curve (area = %0.2f)' % ind_auc)
+    count = 0
+    color_list = ['red', 'crimson', 'navy', 'teal', 'darkorange', 'purple', 'gray',
+                  'green', 'dodgerblue', 'gold', 'lightcoral']
+    for key in prob_dict.keys():
+        fpr, tpr, thresholds = roc_curve(true_y, prob_dict[key])
+        annotation = key + ' (AUC = %0.3f)' % auc_dict[key]
+        plt.plot(fpr, tpr, lw=2, alpha=0.7, color=color_list[count],
+                 label=annotation)
+        count += 1
     plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
     plt.xlim([0.0, 1.0])
     plt.ylim([0.0, 1.05])
@@ -28,26 +28,21 @@ def ro_curve(true_labels, pred_prob, file_path):
     ax.spines['top'].set_linewidth(ax_width)
     ax.spines['right'].set_linewidth(ax_width)
 
-    figure_name = file_path + 'ind_roc.png'
-    plt.savefig(figure_name, dpi=600, transparent=True, bbox_inches='tight')
+    plt.savefig(fig_path, dpi=600, transparent=True, bbox_inches='tight')
     plt.close(0)
-    full_path = os.path.abspath(figure_name)
-    if os.path.isfile(full_path):
-        print('The Receiver Operating Characteristic of independent test can be found:')
-        print(full_path)
-        print('\n')
-    return ind_auc
 
 
-def pr_curve(true_labels, pred_prob, file_path):
-    precision, recall, _ = precision_recall_curve(true_labels, pred_prob)
-    try:
-        ind_auc = auc(recall, precision)
-    except ZeroDivisionError:
-        ind_auc = 0.0
+def plot_prc(true_y, prob_dict, aupr_dict, fig_path):
     plt.figure(0)
-    plt.plot(recall, precision, lw=2, alpha=0.7, color='red',
-             label='PRC curve (area = %0.2f)' % ind_auc)
+    count = 0
+    color_list = ['crimson', 'navy', 'teal', 'darkorange', 'purple', 'gray',
+                  'green', 'dodgerblue', 'gold', 'lightcoral']
+    for key in prob_dict.keys():
+        precision, recall, _ = precision_recall_curve(true_y, prob_dict[key])
+        annotation = key + ' (AUPR = %0.3f)' % aupr_dict[key]
+        plt.plot(recall, precision, lw=2, alpha=0.7, color=color_list[count],
+                 label=annotation)
+        count += 1
     plt.xlim([0.0, 1.0])
     plt.ylim([0.0, 1.05])
     plt.title('Precision-Recall Curve', fontsize=18)
@@ -61,12 +56,5 @@ def pr_curve(true_labels, pred_prob, file_path):
     ax.spines['top'].set_linewidth(ax_width)
     ax.spines['right'].set_linewidth(ax_width)
 
-    figure_name = file_path + 'ind_prc.png'
-    plt.savefig(figure_name, dpi=600, transparent=True, bbox_inches='tight')
+    plt.savefig(fig_path, dpi=600, transparent=True, bbox_inches='tight')
     plt.close(0)
-    full_path = os.path.abspath(figure_name)
-    if os.path.isfile(full_path):
-        print('The Precision-Recall Curve of independent test can be found:')
-        print(full_path)
-        print('\n')
-    return ind_auc

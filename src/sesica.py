@@ -3,7 +3,8 @@ from collections import defaultdict
 import numpy as np
 
 # from clf import clf_process
-from integrate import integration
+# from integrate import integration
+from plot import plot_process
 from utils import util_data, util_ctrl
 
 
@@ -127,9 +128,10 @@ def main(args):
     args = util_ctrl.path_ctrl(args)
     # hetero_bmk(args)
     params = util_ctrl.params_base(args)
-    # clf_process.clf_train(args)
+    # clf_process.clf_train(args, params)
     # clf_process.clf_test(args)
-    integration.int_or_rank(args, params)
+    # integration.int_or_rank(args, params)
+    plot_process.plot_fig(args, False, params)
 
 
 if __name__ == '__main__':
@@ -143,12 +145,12 @@ if __name__ == '__main__':
                        help="The input files for positive and negative associations.")
 
     parse.add_argument('-clf', type=str, nargs='*',
-                       choices=['svm', 'rf', 'ert', 'gnb', 'mnb', 'bnb', 'gbdt', 'dart', 'goss', 'mlp', 'none'],
+                       choices=['svm', 'rf', 'ert', 'knn', 'sgd', 'mnb', 'gbdt', 'dart', 'goss', 'mlp', 'none'],
                        default='none',
                        help="The methods of calculating semantic similarity based on probability distribution:\n"
                             " 'svm' --- Support Vector Machine; 'rf' --- Random Forest;\n"
-                            " 'ert' --- extremely randomized tree; 'gnb' --- Gaussian Naive Bayes;\n"
-                            " 'mnb' --- Multinomial Naive Bayes; 'bnb' --- Bernoulli Naive Bayes;\n"
+                            " 'ert' --- extremely randomized tree; 'knn' --- k-nearest neighbors vote;\n"
+                            " 'sgd' --- Linear classifiers with SGD training; 'mnb' --- Multinomial Naive Bayes;\n"
                             " 'gbdt' --- traditional Gradient Boosting Decision Tree;\n"
                             " 'dart' --- Dropouts meet Multiple Additive Regression Trees;\n"
                             " 'goss' --- Gradient-based One-Side Sampling;\n"
@@ -169,7 +171,9 @@ if __name__ == '__main__':
     # parameters for no grid search
     parse.add_argument('-gs_mode', type=int, choices=[0, 1, 2], default=0,
                        help="grid = 0 for no grid search, 1 for rough grid search, 2 for meticulous grid search.")
-    parse.add_argument('-metrics', type=str, nargs='*', choices=['aupr', 'auc', 'ndcg@k', 'roc@k'], default=['aupr'],
+    parse.add_argument('-metrics', type=str, nargs='*', choices=['aupr', 'auc', 'ndcg@1', 'roc@1', 'ndcg@5', 'roc@5',
+                                                                 'ndcg@10', 'roc@10', 'ndcg@20', 'roc@20',
+                                                                 'ndcg@50', 'roc@50'], default=['aupr'],
                        help="The metrics for parameters selection")
     parse.add_argument('-top_n', type=int, nargs='*', default=[1],
                        help="Select the n best scores for specific metric.")
@@ -183,10 +187,12 @@ if __name__ == '__main__':
     # parameters for mnb
     parse.add_argument('-mnb_a', type=float, nargs='*', default=[1.0],
                        help="The Additive (Laplace/Lidstone) smoothing parameter for Naive Bayes classifier.")
-    # parameters for bnb
-    parse.add_argument('-bnb_a', type=float, nargs='*', default=[1.0],
-                       help="The Additive (Laplace/Lidstone) smoothing parameter for Naive Bayes classifier.")
-    # parameter for gnb is none!
+    # parameters for knn
+    parse.add_argument('-knn_n', type=int, nargs='*', default=[5],
+                       help="Number of neighbors to use by default for k-neighbors queries.")
+    # parameter for sgd
+    parse.add_argument('-sgd_m', type=int, nargs='*', default=[100],
+                       help="he maximum number of passes over the training data (aka epochs).")
     # parameters for gbdt
     parse.add_argument('-gbdt_t', type=int, default=[100], nargs='*', help="Number of boosted trees to fit.")
     parse.add_argument('-gbdt_n', type=int, default=[31], nargs='*', help="Maximum tree leaves for base learners.")
@@ -197,9 +203,9 @@ if __name__ == '__main__':
     parse.add_argument('-goss_t', type=int, default=[100], nargs='*', help="Number of boosted trees to fit.")
     parse.add_argument('-goss_n', type=int, default=[31], nargs='*', help="Maximum tree leaves for base learners.")
     # parameters for mlp
-    parse.add_argument('-act', type=str, nargs='*', choices=['logistic', 'tanh', 'relu'], default=['relu'],
+    parse.add_argument('-act', type=str, choices=['logistic', 'tanh', 'relu'], default='relu',
                        help="Activation function for the hidden layer.")
-    parse.add_argument('-hls', default=[(100,)], nargs='*',
+    parse.add_argument('-hls', type=int, default=100, nargs='*',
                        help="Hidden layer sizes. The ith element represents the number of neurons in the ith hidden "
                             "layer.")
     # parameters for integration
@@ -210,7 +216,7 @@ if __name__ == '__main__':
                             " 'lr' --- logistic regression; 'ltr' --- Learning to rank with LambdaRank.\n"
                        )
     # parameters for de and ga
-    parse.add_argument('-size_pop', type=int, default=10, help="Population size for 'DE' or 'GA'.")
+    parse.add_argument('-pop_size', type=int, default=10, help="Population size for 'DE' or 'GA'.")
     parse.add_argument('-max_iter', type=int, default=100, help="Max iterations for 'DE' or 'GA'.")
     # parameters for lr
     parse.add_argument('-lr_c', type=int, default=[0], nargs='*', help="Regularization parameter of 'LR'.")
@@ -219,5 +225,18 @@ if __name__ == '__main__':
                        help="Maximum tree depth for base learners, <=0 means no limit.")
     parse.add_argument('-ltr_t', type=int, default=[100], nargs='*', help="Number of boosted trees to fit.")
     parse.add_argument('-ltr_n', type=int, default=[31], nargs='*', help="Maximum tree leaves for base learners.")
+    parse.add_argument('-plot', type=str, choices=['prc', 'roc', 'box', 'hp', '3d', 'dist', 'pie', 'bar', 'none'],
+                       default='none', nargs='*',
+                       help="Integrate by:\n"
+                            " 'none' --- Don't plot;\n"
+                            " 'prc' --- precision-recall Curve; 'roc' --- receiver operating characteristic;\n"
+                            " 'box' --- box figure for evaluation results; 'hp' --- heat map of the relevance.\n"
+                            " '3d' --- 3d figure for dimension reduce; 'dist' --- histogram for distribution.\n"
+                            " 'pie' --- pie figure for optimal weight; 'bar' --- histogram for feature importance.\n"
+                       )
+    parse.add_argument('-plot_metric', type=str, choices=['aupr', 'auc', 'ndcg@k', 'roc@k', 'metric_1'],
+                       default='metric_1', help="The metrics for plot, the -plot_metric should be a metric included in "
+                                                "-metric parameter you chose before. The metric_1 means the first "
+                                                "metric you chose in -metrics parameter")
     argv = parse.parse_args()
     main(argv)

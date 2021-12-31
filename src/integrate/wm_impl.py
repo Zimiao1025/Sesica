@@ -25,7 +25,7 @@ def weight_mean(method, prob_arr, label, group, int_path, params):
         print(' DE processing......\n')
         from sko.DE import DE
 
-        de = DE(func=target_func, n_dim=n_dim, size_pop=params['size_pop'], max_iter=params['max_iter'],
+        de = DE(func=target_func, n_dim=n_dim, size_pop=params['pop_size'], max_iter=params['max_iter'],
                 lb=[0] * n_dim, ub=[1] * n_dim)
         best_x, best_y = de.run()
         time_elapsed = time.time() - start_time
@@ -36,7 +36,7 @@ def weight_mean(method, prob_arr, label, group, int_path, params):
         print(' GA processing......\n')
         from sko.DE import GA
 
-        ga = GA(func=target_func, n_dim=n_dim, size_pop=params['size_pop'], max_iter=params['max_iter'],
+        ga = GA(func=target_func, n_dim=n_dim, size_pop=params['pop_size'], max_iter=params['max_iter'],
                 prob_mut=0.001, lb=[0] * n_dim, ub=[1] * n_dim, precision=1e-5)
         best_x, best_y = ga.run()
         time_elapsed = time.time() - start_time
@@ -49,7 +49,7 @@ def weight_mean(method, prob_arr, label, group, int_path, params):
     # save the best weight
     np.save(int_path + 'opt_weight.npy', opt_weight)
     # save the prob for plot
-    np.save(int_path + 'opt_prob.npy', opt_prob)
+    np.save(int_path + 'prob.npy', opt_prob)
     # save the evaluation results
     metric_df = evaluation(params['metrics'], label, opt_prob, group)
     metric_df.to_csv(int_path + 'eval_results.csv')

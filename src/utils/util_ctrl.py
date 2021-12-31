@@ -41,9 +41,12 @@ def path_ctrl(args):
             args.ssc_path[arc] = args.res_dir + arc + '/'
 
     if args.integrate == 'none':
-        args.no_int_path = path_check(args.res_dir + 'no_int/')
+        if len(args.clf) >= 2:
+            args.no_int_path = path_check(args.res_dir + 'no_int/')
     else:
         args.int_path = path_check(args.res_dir + args.integrate + '_int/')
+    if args.plot != 'none':
+        args.fig_dir = path_check(args.res_dir + 'plot/')
 
     return args
 
@@ -78,8 +81,8 @@ def top_n_ctrl(clf, arc, top_n):
 
 def make_clf_pk():
     # 不一定只是clf, 后续扩展
-    return {'svm': ['svm_c', 'svm_g'], 'rf': ['rf_t'], 'ert': ['ert_t'], 'mnb': ['mnb_a'], 'bnb': ['bnb_a'],
-            'gnb': ['none'], 'gbdt': ['gbdt_n', 'gbdt_t'], 'dart': ['dart_n', 'dart_t'], 'goss': ['goss_n', 'goss_t'],
+    return {'svm': ['svm_c', 'svm_g'], 'rf': ['rf_t'], 'ert': ['ert_t'], 'mnb': ['mnb_a'], 'knn': ['knn_n'],
+            'sgd': ['sgd_m'], 'gbdt': ['gbdt_n', 'gbdt_t'], 'dart': ['dart_n', 'dart_t'], 'goss': ['goss_n', 'goss_t'],
             'mlp': ['act', 'hls']}
 
 

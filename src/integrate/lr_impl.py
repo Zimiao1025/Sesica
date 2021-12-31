@@ -1,5 +1,6 @@
 import joblib
 import numpy as np
+import pandas as pd
 from imblearn.over_sampling import SMOTE
 from sklearn.linear_model import LogisticRegression
 
@@ -28,11 +29,13 @@ def lr_train(train_x, train_y, val_x, val_y, val_g, int_path, params):
     clf = LogisticRegression(C=2 ** hp[0], random_state=1025)
     train_x, train_y = SMOTE(random_state=1025).fit_sample(train_x, train_y)
     clf.fit(train_x, train_y)
-    joblib.dump(clf, int_path + 'lr_c_' + str(hp[0]) + '_model.pkl')
+    best_param = [{'lr_c': hp[0]}]
+    pd.DataFrame(best_param).to_csv(int_path + 'params.csv')
+    joblib.dump(clf, int_path + 'lr_model.pkl')
     val_prob = clf.predict_proba(val_x)[:, 1]
     np.save(int_path + 'prob.npy', val_prob)
     # metric: auc, aupr, ndcg@k, roc@k
     metric_df = evaluation(params['metrics'], val_y, val_prob, val_g)
-    metric_df.to_csv(int_path + 'int_results.csv')
+    metric_df.to_csv(int_path + 'eval_results.csv')
     metric_list = metric_df.mean().tolist()
     print('Final results for integration: %s = %.4f\n' % (params['metrics'][0], metric_list[0]))
