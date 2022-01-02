@@ -13,8 +13,9 @@ def load_prob(args, ind, params):
         for n in range(1, top_n + 1):
             plot_data[clf + '_' + str(n)] = clf_prob['top_' + str(n)]
     if args.integrate != 'none':
-        int_file_path = args.int_path + 'prob.npy' if not ind else args.int_path + 'ind_prob.npy'
-        plot_data[args.integrate] = list(np.load(int_file_path))
+        if ind or args.integrate not in ['lr', 'ltr']:
+            int_file_path = args.int_path + 'prob.npy' if not ind else args.int_path + 'ind_prob.npy'
+            plot_data[args.integrate] = list(np.load(int_file_path))
 
     return plot_data
 
@@ -28,8 +29,9 @@ def load_results(args, ind, plot_metric, params):
             eval_data = pd.read_csv(args.ssc_path[clf] + file_name, dtype=np.float).to_dict('list')[plot_metric]
             results[clf + '_' + str(n)] = eval_data
     if args.integrate != 'none':
-        int_file_path = args.int_path + 'eval_results.csv' if not ind else args.int_path + 'eval_results_ind.csv'
-        results[args.integrate] = pd.read_csv(int_file_path, dtype=np.float).to_dict('list')[plot_metric]
+        if ind or args.integrate not in ['lr', 'ltr']:
+            int_file_path = args.int_path + 'eval_results.csv' if not ind else args.int_path + 'eval_results_ind.csv'
+            results[args.integrate] = pd.read_csv(int_file_path, dtype=np.float).to_dict('list')[plot_metric]
 
     return results
 
@@ -43,8 +45,9 @@ def load_metric(args, ind, plot_metric, params):
             eval_data = pd.read_csv(args.ssc_path[clf] + file_name, dtype=np.float).to_dict('list')[plot_metric]
             results[clf + '_' + str(n)] = np.mean(eval_data)
     if args.integrate != 'none':
-        int_file_path = args.int_path + 'eval_results.csv' if not ind else args.int_path + 'eval_results_ind.csv'
-        results[args.integrate] = np.mean(pd.read_csv(int_file_path, dtype=np.float).to_dict('list')[plot_metric])
+        if ind or args.integrate not in ['lr', 'ltr']:
+            int_file_path = args.int_path + 'eval_results.csv' if not ind else args.int_path + 'eval_results_ind.csv'
+            results[args.integrate] = np.mean(pd.read_csv(int_file_path, dtype=np.float).to_dict('list')[plot_metric])
 
     return results
 
@@ -64,8 +67,7 @@ def plot_fig(args, ind, params):
         if pl in ['prc', 'roc']:
             metric = 'aupr' if pl == 'prc' else 'auc'
             au_dict = load_metric(args, ind, metric, params)
-            print(au_dict)
-            exit()
+            print('au_dict: ', au_dict)
             true_y = np.load(args.data_dir + 'valid_y.npy') if not ind else np.load(args.data_dir + 'ind_y.npy')
             prob_dict = load_prob(args, ind, params)
             if pl == 'prc':

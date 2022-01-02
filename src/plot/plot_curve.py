@@ -6,8 +6,8 @@ from sklearn.metrics import roc_curve
 def plot_roc(true_y, prob_dict, auc_dict, fig_path):
     plt.figure(0)
     count = 0
-    color_list = ['red', 'crimson', 'navy', 'teal', 'darkorange', 'purple', 'gray',
-                  'green', 'dodgerblue', 'gold', 'lightcoral']
+    color_list = ['crimson', 'navy', 'teal', 'darkorange', 'purple', 'gray',
+                  'green', 'dodgerblue', 'gold', 'lightcoral', 'red']
     for key in prob_dict.keys():
         fpr, tpr, thresholds = roc_curve(true_y, prob_dict[key])
         annotation = key + ' (AUC = %0.3f)' % auc_dict[key]
@@ -36,7 +36,7 @@ def plot_prc(true_y, prob_dict, aupr_dict, fig_path):
     plt.figure(0)
     count = 0
     color_list = ['crimson', 'navy', 'teal', 'darkorange', 'purple', 'gray',
-                  'green', 'dodgerblue', 'gold', 'lightcoral']
+                  'green', 'dodgerblue', 'gold', 'lightcoral', 'red']
     for key in prob_dict.keys():
         precision, recall, _ = precision_recall_curve(true_y, prob_dict[key])
         annotation = key + ' (AUPR = %0.3f)' % aupr_dict[key]

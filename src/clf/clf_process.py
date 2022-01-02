@@ -9,9 +9,8 @@ from clf.lgb_impl import lgb_train
 from clf.mlp_impl import mlp_train
 from clf.nb_impl import nb_train
 from clf.rt_impl import rt_train
-from clf.sgd_impl import sgd_train
-from clf.svm_impl import svm_train
-from utils import util_params, util_eval
+from clf.svm_impl import lsvm_train, rsvm_train
+from utils import util_params, util_eval, util_data
 
 
 def clf_train(args, params):
@@ -25,13 +24,16 @@ def clf_train(args, params):
 
     for clf in args.clf:
         params = util_params.clf_params_control(clf, args, params)
+        if params['scale'][clf] != 'none':
+            train_x = util_data.pre_fit(train_x, params['scale'][clf], args.scale_path)
+            valid_x = util_data.pre_trans(valid_x, params['scale'][clf], args.scale_path)
 
-        if clf == 'svm':
-            svm_train(train_x, train_y, valid_x, valid_y, valid_g, args.clf_path[clf], params)
+        if clf == 'rsvm':
+            rsvm_train(train_x, train_y, valid_x, valid_y, valid_g, args.clf_path[clf], params)
+        elif clf == 'lsvm':
+            lsvm_train(train_x, train_y, valid_x, valid_y, valid_g, args.clf_path[clf], params)
         elif clf == 'knn':
             knn_train(train_x, train_y, valid_x, valid_y, valid_g, args.clf_path[clf], params)
-        elif clf == 'sgd':
-            sgd_train(train_x, train_y, valid_x, valid_y, valid_g, args.clf_path[clf], params)
         elif clf in ['rf', 'ert']:
             rt_train(clf, train_x, train_y, valid_x, valid_y, valid_g, args.clf_path[clf], params)
         elif clf == 'mnb':
@@ -42,12 +44,14 @@ def clf_train(args, params):
             mlp_train(train_x, train_y, valid_x, valid_y, valid_g, args.clf_path[clf], params)
 
 
-def clf_test(args):
+def clf_test(args, params):
     test_x = np.load(args.data_dir + 'test_x.npy')
     # test_y = np.load(args.data_dir + 'test_y.npy')
     # test_g = np.load(args.data_dir + 'test_g.npy')
     prob_dict = {}
     for clf in args.clf:
+        if params['scale'][clf] != 'none':
+            test_x = util_data.pre_trans(test_x, params['scale'][clf], args.scale_path)
         model_path = args.clf_path[clf]
         for file_name in os.listdir(model_path):
             if file_name.endswith('pkl'):
@@ -64,12 +68,14 @@ def clf_test(args):
         df.to_csv(model_path + 'test_prob.csv')
 
 
-def clf_predict(args):
+def clf_predict(args, params):
     test_x = np.load(args.data_dir + 'ind_x.npy')
     test_y = np.load(args.data_dir + 'ind_y.npy')
     test_g = np.load(args.data_dir + 'ind_g.npy')
     prob_dict = {}
     for clf in args.clf:
+        if params['scale'][clf] != 'none':
+            test_x = util_data.pre_trans(test_x, params['scale'][clf], args.scale_path)
         model_path = args.clf_path[clf]
         for file_name in os.listdir(model_path):
             if file_name.endswith('pkl'):

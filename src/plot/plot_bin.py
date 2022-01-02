@@ -53,7 +53,7 @@ def plot_3d(data, labels, fig_path):
 
 
 def box_fig(dt, fig_path):
-    plt.boxplot(x=dt.values, labels=dt.columns, whis=1.5)  # columns列索引，values所有数值
+    plt.boxplot(x=dt.values, labels=dt.columns, whis=1.5, showfliers=False)  # columns列索引，values所有数值
     plt.savefig(fig_path)
     plt.close(0)
     # sns.boxplot(x="distance", y="method", data=dt, whis=[0, 100], width=.6, palette="vlag")

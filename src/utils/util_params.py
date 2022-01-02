@@ -2,7 +2,7 @@ import sys
 from itertools import count, takewhile
 
 
-def svm_params_check(cost, gamma, gs_mode=0):  # 2: meticulous; 1: 'rough'; 0: 'none'.
+def rsvm_params_check(cost, gamma, gs_mode=0):  # 2: meticulous; 1: 'rough'; 0: 'none'.
     if gs_mode == 0:
         if len(cost) == 1:
             c_range = range(cost[0], cost[0] + 1, 1)
@@ -37,6 +37,26 @@ def svm_params_check(cost, gamma, gs_mode=0):  # 2: meticulous; 1: 'rough'; 0: '
         g_range = range(-10, 6, 1)
 
     return c_range, g_range
+
+
+def lsvm_params_check(cost, gs_mode=0):  # 2: meticulous; 1: 'rough'; 0: 'none'.
+    if gs_mode == 0:
+        if len(cost) == 1:
+            c_range = range(cost[0], cost[0] + 1, 1)
+        elif len(cost) == 2:
+            c_range = range(cost[0], cost[1] + 1, 1)
+        elif len(cost) == 3:
+            c_range = range(cost[0], cost[1] + 1, cost[2])
+        else:
+            error_info = 'The number of input value of parameter "svm_c" should be no more than 3!'
+            sys.stderr.write(error_info)
+            return False
+    elif gs_mode == 1:
+        c_range = range(-5, 11, 3)
+    else:
+        c_range = range(-5, 11, 1)
+
+    return c_range
 
 
 def rt_params_check(tree, gs_mode=0):
@@ -77,26 +97,6 @@ def knn_params_check(num, gs_mode=0):
         n_range = [5, 10, 20, 50, 100]
 
     return n_range
-
-
-def sgd_params_check(epoch, gs_mode=0):
-    if gs_mode == 0:
-        if len(epoch) == 1:
-            e_range = range(epoch[0], epoch[0] + 500, 500)
-        elif len(epoch) == 2:
-            e_range = range(epoch[0], epoch[1] + 500, 500)
-        elif len(epoch) == 3:
-            e_range = range(epoch[0], epoch[1] + 500, epoch[2])
-        else:
-            error_info = 'The number of input value of parameter "knn_n" should be no more than 3!'
-            sys.stderr.write(error_info)
-            return False
-    elif gs_mode == 1:
-        e_range = [100, 500, 1000, 1500, 2000, 2500]
-    else:
-        e_range = [500, 1000, 1500]
-
-    return e_range
 
 
 def f_range(start, stop, step):
@@ -160,8 +160,10 @@ def lgb_params_check(tree, num_leaves, gs_mode=0):
 
 
 def clf_params_control(clf, args, params):
-    if clf == 'svm':
-        params['svm_c'], params['svm_g'] = svm_params_check(args.svm_c, args.svm_c, args.gs_mode)
+    if clf == 'rsvm':
+        params['rsvm_c'], params['rsvm_g'] = rsvm_params_check(args.rsvm_c, args.rsvm_c, args.gs_mode)
+    elif clf == 'lsvm':
+        params['lsvm_c'] = lsvm_params_check(args.lsvm_c, args.gs_mode)
     elif clf == 'rf':
         params['rf_t'] = rt_params_check(args.rf_t, args.gs_mode)
     elif clf == 'ert':
@@ -170,8 +172,6 @@ def clf_params_control(clf, args, params):
         params['knn_n'] = knn_params_check(args.knn_n, args.gs_mode)
     elif clf == 'mnb':
         params['mnb_a'] = mnb_params_check(args.mnb_a, args.gs_mode)
-    elif clf == 'sgd':
-        params['sgd_m'] = sgd_params_check(args.sgd_m, args.gs_mode)
     elif clf == 'gbdt':
         params['gbdt_t'], params['gbdt_n'] = lgb_params_check(args.gbdt_t, args.gbdt_n, args.gs_mode)
     elif clf == 'dart':

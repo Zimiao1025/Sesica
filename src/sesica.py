@@ -128,8 +128,9 @@ def main(args):
     args = util_ctrl.path_ctrl(args)
     # hetero_bmk(args)
     params = util_ctrl.params_base(args)
+    # print(params)
     # clf_process.clf_train(args, params)
-    # clf_process.clf_test(args)
+    # clf_process.clf_test(args, params)
     # integration.int_or_rank(args, params)
     plot_process.plot_fig(args, False, params)
 
@@ -145,19 +146,19 @@ if __name__ == '__main__':
                        help="The input files for positive and negative associations.")
 
     parse.add_argument('-clf', type=str, nargs='*',
-                       choices=['svm', 'rf', 'ert', 'knn', 'sgd', 'mnb', 'gbdt', 'dart', 'goss', 'mlp', 'none'],
+                       choices=['rsvm', 'lsvm', 'rf', 'ert', 'knn', 'mnb', 'gbdt', 'dart', 'goss', 'mlp', 'none'],
                        default='none',
                        help="The methods of calculating semantic similarity based on probability distribution:\n"
-                            " 'svm' --- Support Vector Machine; 'rf' --- Random Forest;\n"
+                            " 'rsvm' --- Support Vector Machine with RBF kernel; 'rf' --- Random Forest;\n"
                             " 'ert' --- extremely randomized tree; 'knn' --- k-nearest neighbors vote;\n"
-                            " 'sgd' --- Linear classifiers with SGD training; 'mnb' --- Multinomial Naive Bayes;\n"
+                            " 'lsvm' --- Support Vector Machine with Linear kernel; 'mnb' ---Multinomial Naive Bayes;\n"
                             " 'gbdt' --- traditional Gradient Boosting Decision Tree;\n"
                             " 'dart' --- Dropouts meet Multiple Additive Regression Trees;\n"
                             " 'goss' --- Gradient-based One-Side Sampling;\n"
                             " 'mlp' --- Multi-layer Perceptron.\n"
                        )
     parse.add_argument('-arc', type=str, nargs='*',
-                       choices=['svm', 'rf', 'ert', 'gnb', 'mnb', 'bnb', 'gbdt', 'dart', 'goss', 'mlp', 'none'],
+                       choices=['svm', 'lsvm', 'rf', 'ert', 'gnb', 'mnb', 'bnb', 'gbdt', 'dart', 'goss', 'mlp', 'none'],
                        default='none',
                        help="The methods of calculating semantic similarity based on probability distribution:\n"
                             " 'svm'  --- Support Vector Machine; 'rf' --- Random Forest;\n"
@@ -168,6 +169,11 @@ if __name__ == '__main__':
                             " 'goss' --- Gradient-based One-Side Sampling;\n"
                             " 'mlp'  --- Multi-layer Perceptron.\n"
                        )
+    parse.add_argument('-scale', type=str, nargs='*', choices=['mms', 'ss', 'nor', 'none'], default=['none'],
+                       help=" 'mms' --- scale with MinMaxScaler;\n"
+                            " 'ss' --- scale with StandardScaler;\n"
+                            " 'nor' --- scale with Normalizer;\n"
+                            " 'none'  --- without scale.\n")
     # parameters for no grid search
     parse.add_argument('-gs_mode', type=int, choices=[0, 1, 2], default=0,
                        help="grid = 0 for no grid search, 1 for rough grid search, 2 for meticulous grid search.")
@@ -178,8 +184,9 @@ if __name__ == '__main__':
     parse.add_argument('-top_n', type=int, nargs='*', default=[1],
                        help="Select the n best scores for specific metric.")
     # parameters for svm
-    parse.add_argument('-svm_c', type=int, default=[0], nargs='*', help="Regularization parameter of 'SVM'.")
-    parse.add_argument('-svm_g', type=int, default=[1], nargs='*', help="Kernel coefficient for 'rbf' of 'SVM'.")
+    parse.add_argument('-rsvm_c', type=int, default=[0], nargs='*', help="Regularization parameter of 'RSVM'.")
+    parse.add_argument('-rsvm_g', type=int, default=[1], nargs='*', help="Kernel coefficient for 'rbf' of 'RSVM'.")
+    parse.add_argument('-lsvm_c', type=int, default=[0], nargs='*', help="Regularization parameter of 'LSVM'.")
     # parameters for rf
     parse.add_argument('-rf_t', type=int, default=[100], nargs='*', help="Number of boosted trees to fit.")
     # parameters for ert
@@ -188,11 +195,8 @@ if __name__ == '__main__':
     parse.add_argument('-mnb_a', type=float, nargs='*', default=[1.0],
                        help="The Additive (Laplace/Lidstone) smoothing parameter for Naive Bayes classifier.")
     # parameters for knn
-    parse.add_argument('-knn_n', type=int, nargs='*', default=[5],
+    parse.add_argument('-knn_n', type=int, nargs='*', default=[100],
                        help="Number of neighbors to use by default for k-neighbors queries.")
-    # parameter for sgd
-    parse.add_argument('-sgd_m', type=int, nargs='*', default=[100],
-                       help="he maximum number of passes over the training data (aka epochs).")
     # parameters for gbdt
     parse.add_argument('-gbdt_t', type=int, default=[100], nargs='*', help="Number of boosted trees to fit.")
     parse.add_argument('-gbdt_n', type=int, default=[31], nargs='*', help="Maximum tree leaves for base learners.")
@@ -205,7 +209,7 @@ if __name__ == '__main__':
     # parameters for mlp
     parse.add_argument('-act', type=str, choices=['logistic', 'tanh', 'relu'], default='relu',
                        help="Activation function for the hidden layer.")
-    parse.add_argument('-hls', type=int, default=100, nargs='*',
+    parse.add_argument('-hls', type=int, default=[100], nargs='*',
                        help="Hidden layer sizes. The ith element represents the number of neurons in the ith hidden "
                             "layer.")
     # parameters for integration

@@ -26,6 +26,8 @@ def path_ctrl(args):
     args.res_dir = args.base_dir + 'result/'
     # create directory for processed input data
     args.data_dir = path_check(args.res_dir + 'bmk_data/')
+    # create directory for scale model
+    args.scale_path = path_check(args.res_dir + 'scale/')
     # create directory for each classifier
     args.ssc_path = {}
     if args.clf != 'none':
@@ -72,21 +74,48 @@ def top_n_ctrl(clf, arc, top_n):
     top_n_10 = {}
     if clf != 'none':
         for ml in clf:
-            top_n_10[ml] = top_n[++count] if tmp_len >= count else 1
+            top_n_10[ml] = top_n[count] if count <= tmp_len - 1 else 1
+            count += 1
     if arc != 'none':
         for dl in arc:
-            top_n_10[dl] = top_n[++count] if tmp_len >= count else 1
+            top_n_10[dl] = top_n[count] if count <= tmp_len - 1 else 1
+            count += 1
     return top_n_10
+
+
+def scale_ctrl(clf, arc, scale):
+    # scale = [mms, ss, ...,]  ----  scale --> list
+    count = 0
+    tmp_len = len(scale)
+    scale_dict = {}
+    if clf != 'none':
+        for ml in clf:
+            scale_dict[ml] = scale[count] if count <= tmp_len - 1 else 'none'
+            count += 1
+    if arc != 'none':
+        for dl in arc:
+            scale_dict[dl] = scale[count] if count <= tmp_len - 1 else 'none'
+            count += 1
+    # EXTRA
+    if 'rsvm' in clf:
+        scale_dict['rsvm'] = 'ss'
+    if 'lsvm' in clf:
+        scale_dict['lsvm'] = 'ss'
+    if 'mlp' in clf:
+        scale_dict['mlp'] = 'mms'
+    if 'knn' in clf:
+        scale_dict['knn'] = 'mms'
+    return scale_dict
 
 
 def make_clf_pk():
     # 不一定只是clf, 后续扩展
-    return {'svm': ['svm_c', 'svm_g'], 'rf': ['rf_t'], 'ert': ['ert_t'], 'mnb': ['mnb_a'], 'knn': ['knn_n'],
-            'sgd': ['sgd_m'], 'gbdt': ['gbdt_n', 'gbdt_t'], 'dart': ['dart_n', 'dart_t'], 'goss': ['goss_n', 'goss_t'],
+    return {'rsvm': ['rsvm_c', 'rsvm_g'], 'lsvm': ['lsvm_c'], 'rf': ['rf_t'], 'ert': ['ert_t'], 'mnb': ['mnb_a'],
+            'knn': ['knn_n'], 'gbdt': ['gbdt_n', 'gbdt_t'], 'dart': ['dart_n', 'dart_t'], 'goss': ['goss_n', 'goss_t'],
             'mlp': ['act', 'hls']}
 
 
 def params_base(args):
-    params = {'top_n': top_n_ctrl(args.clf, args.arc, args.top_n), 'metrics': args.metrics,
-              'param_keys': make_clf_pk()}
+    params = {'scale': scale_ctrl(args.clf, args.arc, args.scale), 'top_n': top_n_ctrl(args.clf, args.arc, args.top_n),
+              'metrics': args.metrics, 'param_keys': make_clf_pk()}
     return params
