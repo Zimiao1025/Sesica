@@ -9,6 +9,41 @@ from sklearn.decomposition import KernelPCA
 from sklearn.manifold import TSNE
 
 
+def polar_fig(methods, val_list, metric_list, fig_path):
+    # use ggplot style
+    plt.style.use('ggplot')
+    N = len(val_list[1])
+    # 设置雷达图的角度，用于平分切开一个平面
+    angles = np.linspace(0, 2 * np.pi, N, endpoint=False)
+    angles = np.concatenate((angles, [angles[0]]))
+
+    # 使雷达图封闭起来
+    cyc_val_list = []
+    for val in val_list:
+        cyc_val_list.append(np.concatenate((val, [val[0]])))
+
+    # 绘图
+    fig = plt.figure()
+    # 设置为极坐标格式
+    ax = fig.add_subplot(111, polar=True)
+    # 绘制折线图
+    color_sets = cycle(['crimson', 'navy', 'teal', 'darkorange', 'slategrey'])
+    for method, cyc_val, cor in zip(methods, cyc_val_list, color_sets):
+        ax.plot(angles, cyc_val, 'o-', linewidth=2, label=method)
+        ax.fill(angles, cyc_val, cor, alpha=0.5)
+    # 添加每个特质的标签
+    metric_list = np.concatenate((metric_list, [metric_list[0]]))
+    ax.set_thetagrids(angles * 180 / np.pi, metric_list)
+    # 设置极轴范围
+    ax.set_ylim(0, 1)
+    # 添加标题
+    plt.title('Polar fig')
+    # 增加网格纸
+    ax.grid(True)
+    plt.savefig(fig_path)
+    plt.close(0)
+
+
 def plot_3d(data, labels, fig_path):
     try:
         # print(data)
@@ -59,9 +94,13 @@ def box_fig(dt, fig_path):
     # sns.boxplot(x="distance", y="method", data=dt, whis=[0, 100], width=.6, palette="vlag")
 
 
-def dist_fig(dt, fig_path):
+def dist_fig(prob_arr, dist_method, fig_path):
     sns.set_palette("hls")  # 设置所有图的颜色，使用hls色彩空间
-    sns.displot(x=dt.values, color="r", bins=30, kde=True)
+    color_sets = ['crimson', 'navy', 'teal', 'darkorange', 'slategrey']
+    print(prob_arr)
+    print(prob_arr[:, 1])
+    for i in range(len(dist_method)):
+        plt.hist(prob_arr[:, i], bins=20, rwidth=0.8, alpha=0.7, histtype='bar', color=color_sets[i], label=dist_method[i])
     plt.savefig(fig_path)
     plt.close(0)
 

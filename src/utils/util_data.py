@@ -11,7 +11,7 @@ def dataset_split(index_list):
     sp_num = len(index_list) // 5
     np.random.shuffle(index_list)
 
-    return index_list[:sp_num*3], index_list[sp_num*3:sp_num*4], index_list[sp_num*4:]
+    return index_list[:sp_num * 3], index_list[sp_num * 3:sp_num * 4], index_list[sp_num * 4:]
 
 
 def pre_fit(train_x, sc_method, scale_path):
@@ -31,3 +31,9 @@ def pre_trans(valid_x, sc_method, scale_path):
     model_path = scale_path + sc_method + '_scale.pkl'
     scale = joblib.load(model_path)
     return scale.transform(valid_x)
+
+
+def embedding_trunc(embedding_in, encoding):
+    _range = np.max(encoding) - np.min(encoding)
+    encoding = (encoding - np.min(encoding)) / _range
+    return np.array(np.trunc(encoding * embedding_in), dtype=np.int)

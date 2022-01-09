@@ -2,7 +2,7 @@ import sys
 from itertools import count, takewhile
 
 
-def rsvm_params_check(cost, gamma, gs_mode=0):  # 2: meticulous; 1: 'rough'; 0: 'none'.
+def svm_params_check(cost, gamma, gs_mode=0):  # 2: meticulous; 1: 'rough'; 0: 'none'.
     if gs_mode == 0:
         if len(cost) == 1:
             c_range = range(cost[0], cost[0] + 1, 1)
@@ -37,26 +37,6 @@ def rsvm_params_check(cost, gamma, gs_mode=0):  # 2: meticulous; 1: 'rough'; 0: 
         g_range = range(-10, 6, 1)
 
     return c_range, g_range
-
-
-def lsvm_params_check(cost, gs_mode=0):  # 2: meticulous; 1: 'rough'; 0: 'none'.
-    if gs_mode == 0:
-        if len(cost) == 1:
-            c_range = range(cost[0], cost[0] + 1, 1)
-        elif len(cost) == 2:
-            c_range = range(cost[0], cost[1] + 1, 1)
-        elif len(cost) == 3:
-            c_range = range(cost[0], cost[1] + 1, cost[2])
-        else:
-            error_info = 'The number of input value of parameter "svm_c" should be no more than 3!'
-            sys.stderr.write(error_info)
-            return False
-    elif gs_mode == 1:
-        c_range = range(-5, 11, 3)
-    else:
-        c_range = range(-5, 11, 1)
-
-    return c_range
 
 
 def rt_params_check(tree, gs_mode=0):
@@ -160,10 +140,8 @@ def lgb_params_check(tree, num_leaves, gs_mode=0):
 
 
 def clf_params_control(clf, args, params):
-    if clf == 'rsvm':
-        params['rsvm_c'], params['rsvm_g'] = rsvm_params_check(args.rsvm_c, args.rsvm_c, args.gs_mode)
-    elif clf == 'lsvm':
-        params['lsvm_c'] = lsvm_params_check(args.lsvm_c, args.gs_mode)
+    if clf == 'svm':
+        params['svm_c'], params['svm_g'] = svm_params_check(args.rsvm_c, args.rsvm_c, args.gs_mode)
     elif clf == 'rf':
         params['rf_t'] = rt_params_check(args.rf_t, args.gs_mode)
     elif clf == 'ert':

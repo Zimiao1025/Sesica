@@ -9,7 +9,7 @@ from clf.lgb_impl import lgb_train
 from clf.mlp_impl import mlp_train
 from clf.nb_impl import nb_train
 from clf.rt_impl import rt_train
-from clf.svm_impl import lsvm_train, rsvm_train
+from clf.svm_impl import svm_train
 from utils import util_params, util_eval, util_data
 
 
@@ -28,10 +28,8 @@ def clf_train(args, params):
             train_x = util_data.pre_fit(train_x, params['scale'][clf], args.scale_path)
             valid_x = util_data.pre_trans(valid_x, params['scale'][clf], args.scale_path)
 
-        if clf == 'rsvm':
-            rsvm_train(train_x, train_y, valid_x, valid_y, valid_g, args.clf_path[clf], params)
-        elif clf == 'lsvm':
-            lsvm_train(train_x, train_y, valid_x, valid_y, valid_g, args.clf_path[clf], params)
+        if clf == 'svm':
+            svm_train(train_x, train_y, valid_x, valid_y, valid_g, args.clf_path[clf], params)
         elif clf == 'knn':
             knn_train(train_x, train_y, valid_x, valid_y, valid_g, args.clf_path[clf], params)
         elif clf in ['rf', 'ert']:

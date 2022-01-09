@@ -1,32 +1,20 @@
-import lightgbm as lgb
+import joblib
 import matplotlib.pyplot as plt
 import numpy as np
-import shap
-import joblib
 
 
-def bar_fig(df, model_path, feats_name, fig_path):
+def bar_fig(model_path, feats_name, fig_path):
     # 利用shap打印特征重要度
     gbm = joblib.load(model_path)
     scores = gbm.feature_importances_
-    feature_name = gbm.feature_name_
     print(scores)
-    print(feature_name)
-
-    explainer = shap.TreeExplainer(gbm)
-    shp_values = explainer.shap_values(df[feats_name])
-    print(shp_values.shape)
-    exit()
     plt.figure(0)
     bar_width = 0.35
-    x1, x2, x3 = [], [], []
+    x1 = []
     for i in range(len(scores)):
         x1.append(i)
-        x2.append(i + bar_width)
-        x3.append(i + bar_width / 2)
     plt.bar(x1, scores, bar_width, color='crimson', align="center",  label="scores", alpha=0.5)
-    plt.bar(x2, shp_values, bar_width, color='navy', align="center", label="shp_values", alpha=0.5)
-    plt.xticks(x3, feats_name, size=10)
+    plt.xticks(x1, feats_name, size=10)
     plt.title('Feature importance for LTR', fontsize=18)
     plt.xlabel('method', fontsize=16)
     plt.ylabel('Feature importance', fontsize=16)
@@ -40,7 +28,8 @@ def bar_fig(df, model_path, feats_name, fig_path):
     plt.close(0)
 
 
-def pie_fig(data, recipe):
+def pie_fig(data, recipe, fig_path):
+    print(recipe)
     fig, ax = plt.subplots(figsize=(6, 3), subplot_kw=dict(aspect="equal"))
     # startangle 设置方向
     wedges, texts = ax.pie(data, wedgeprops=dict(width=0.5), startangle=-40)
@@ -65,6 +54,6 @@ def pie_fig(data, recipe):
         ax.annotate(recipe[i], xy=(x, y), xytext=(1.35 * np.sign(x), 1.4 * y),
                     horizontalalignment=horizontalalignment, color='black', **kw)
 
-    ax.set_title("Matplotlib bakery: A donut")
+    # ax.set_title("Matplotlib bakery: A donut")
 
-    plt.show()
+    plt.savefig(fig_path)

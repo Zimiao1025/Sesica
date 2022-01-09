@@ -37,7 +37,7 @@ def roc_score(y_true, y_prob, level):
     return roc_at_score
 
 
-def dcg_score(y_true, y_score, k=5):
+def dcg_score_k(y_true, y_score, k=5):
     order = np.argsort(y_score)[::-1]
     y_true = np.take(y_true, order[:k])
     gain = 2 ** y_true - 1
@@ -45,9 +45,28 @@ def dcg_score(y_true, y_score, k=5):
     return np.sum(gain / discounts)
 
 
-def ndcg_score(y_true, y_score, k):
-    dcg = dcg_score(y_true, y_score, k)
-    idcg = dcg_score(y_true, y_true, k)
+def dcg_score(y_true, y_score):
+    order = np.argsort(y_score)[::-1]
+    y_true = np.take(y_true, order[:])
+    gain = 2 ** y_true - 1
+    discounts = np.log2(np.arange(len(y_true)) + 2)
+    return np.sum(gain / discounts)
+
+
+def ndcg_score_k(y_true, y_score, k):
+    dcg = dcg_score_k(y_true, y_score, k)
+    idcg = dcg_score_k(y_true, y_true, k)
+    try:
+        ndcg = dcg / idcg
+    except ZeroDivisionError:
+        ndcg = 0.0
+
+    return ndcg
+
+
+def ndcg_score(y_true, y_score):
+    dcg = dcg_score(y_true, y_score)
+    idcg = dcg_score(y_true, y_true)
     try:
         ndcg = dcg / idcg
     except ZeroDivisionError:
@@ -81,9 +100,11 @@ def group_eval(metric, y_true, y_prob):
         eval_score = aupr_score(y_true, y_prob)
     elif metric == 'auc':
         eval_score = auc_score(y_true, y_prob)
-    elif 'ndcg' in metric:
+    elif metric == 'ndcg':
+        eval_score = ndcg_score(y_true, y_prob)
+    elif 'ndcg' in metric and metric != 'ndcg':
         k = int(metric.split('@')[1])
-        eval_score = ndcg_score(y_true, y_prob, k)
+        eval_score = ndcg_score_k(y_true, y_prob, k)
     else:
         k = int(metric.split('@')[1])
         eval_score = roc_score(y_true, y_prob, k)

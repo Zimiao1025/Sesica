@@ -97,10 +97,8 @@ def scale_ctrl(clf, arc, scale):
             scale_dict[dl] = scale[count] if count <= tmp_len - 1 else 'none'
             count += 1
     # EXTRA
-    if 'rsvm' in clf:
-        scale_dict['rsvm'] = 'ss'
-    if 'lsvm' in clf:
-        scale_dict['lsvm'] = 'ss'
+    if 'svm' in clf:
+        scale_dict['svm'] = 'ss'
     if 'mlp' in clf:
         scale_dict['mlp'] = 'mms'
     if 'knn' in clf:
@@ -110,8 +108,8 @@ def scale_ctrl(clf, arc, scale):
 
 def make_clf_pk():
     # 不一定只是clf, 后续扩展
-    return {'rsvm': ['rsvm_c', 'rsvm_g'], 'lsvm': ['lsvm_c'], 'rf': ['rf_t'], 'ert': ['ert_t'], 'mnb': ['mnb_a'],
-            'knn': ['knn_n'], 'gbdt': ['gbdt_n', 'gbdt_t'], 'dart': ['dart_n', 'dart_t'], 'goss': ['goss_n', 'goss_t'],
+    return {'svm': ['svm_c', 'svm_g'], 'rf': ['rf_t'], 'ert': ['ert_t'], 'mnb': ['mnb_a'], 'knn': ['knn_n'],
+            'gbdt': ['gbdt_n', 'gbdt_t'], 'dart': ['dart_n', 'dart_t'], 'goss': ['goss_n', 'goss_t'],
             'mlp': ['act', 'hls']}
 
 
