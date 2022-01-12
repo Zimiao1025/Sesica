@@ -37,3 +37,9 @@ def embedding_trunc(embedding_in, encoding):
     _range = np.max(encoding) - np.min(encoding)
     encoding = (encoding - np.min(encoding)) / _range
     return np.array(np.trunc(encoding * embedding_in), dtype=np.int)
+
+
+def normalize_prob(prob):
+    _range = np.max(prob) - np.min(prob)
+    nor_prob = (prob - np.min(prob)) / _range
+    return nor_prob

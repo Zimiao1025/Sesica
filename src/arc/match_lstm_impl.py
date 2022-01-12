@@ -3,8 +3,9 @@ import torch
 import matchzoo as mz
 
 
-def match_lstm_train(train_set, valid_set, model_path):
-    ranking_task = mz.tasks.Ranking(losses=mz.losses.RankCrossEntropyLoss(num_neg=4))
+def match_lstm_train(train_set, valid_set, test_set, model_path, ind_set=None, params=None):
+    # Make use of MatchZoo customized loss functions and evaluation metrics to define a task:
+    ranking_task = mz.tasks.Ranking(losses=mz.losses.RankCrossEntropyLoss(num_neg=params['num_neg']['match_lstm']))
     ranking_task.metrics = [
         mz.metrics.NormalizedDiscountedCumulativeGain(k=3),
         mz.metrics.NormalizedDiscountedCumulativeGain(k=5),
@@ -23,20 +24,26 @@ def match_lstm_train(train_set, valid_set, model_path):
         stage='dev',
         callback=padding_callback
     )
-
-    # In[9]:
+    test_loader = mz.dataloader.DataLoader(
+        dataset=test_set,
+        stage='dev',
+        callback=padding_callback
+    )
+    if ind_set:
+        ind_loader = mz.dataloader.DataLoader(
+            dataset=ind_set,
+            stage='dev',
+            callback=padding_callback
+        )
+    else:
+        ind_loader = None
 
     model = mz.models.MatchLSTM()
-
     model.params['task'] = ranking_task
     model.params['mask_value'] = 0
     model.params['embedding'] = np.empty([10000, 100], dtype=float)
-
     model.build()
-
     print(model, sum(p.numel() for p in model.parameters() if p.requires_grad))
-
-    # In[10]:
 
     optimizer = torch.optim.Adadelta(model.parameters())
 
@@ -50,9 +57,7 @@ def match_lstm_train(train_set, valid_set, model_path):
         model_path=model_path
     )
 
-    # In[11]:
-
     trainer.run()
-    valid_prob = trainer.predict(valid_loader)
-    print(valid_prob)
     trainer.save_model()
+
+    return trainer, valid_loader, test_loader, ind_loader

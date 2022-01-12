@@ -279,6 +279,9 @@ if __name__ == '__main__':
     parse.add_argument('-hls', type=int, default=[100], nargs='*',
                        help="Hidden layer sizes. The ith element represents the number of neurons in the ith hidden "
                             "layer.")
+
+    parse.add_argument('-emb_in', type=int, default=[10000, 30000], nargs='*', help="Embedding size input.")
+
     # parameters for integration
     parse.add_argument('-integrate', type=str, choices=['de', 'ga', 'lr', 'ltr', 'none'], default='none',
                        help="Integrate by:\n"
@@ -309,6 +312,5 @@ if __name__ == '__main__':
                        default='metric_1', help="The metrics for plot, the -plot_metric should be a metric included in "
                                                 "-metric parameter you chose before. The metric_1 means the first "
                                                 "metric you chose in -metrics parameter")
-    parse.add_argument('-emb_in', type=int, default=[10000, 30000], nargs='*', help="Embedding size input.")
     argv = parse.parse_args()
     main(argv)

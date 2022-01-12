@@ -2,15 +2,14 @@ import torch
 import matchzoo as mz
 
 
-def cdssm_train(train_set, valid_set, model_path):
-    # ranking_task = mz.tasks.Ranking(losses=mz.losses.RankHingeLoss())
-    ranking_task = mz.tasks.Ranking(losses=mz.losses.RankCrossEntropyLoss(num_neg=4))
+def cdssm_train(train_set, valid_set, test_set, model_path, ind_set=None, params=None):
+    # Make use of MatchZoo customized loss functions and evaluation metrics to define a task:
+    ranking_task = mz.tasks.Ranking(losses=mz.losses.RankCrossEntropyLoss(num_neg=params['num_neg']['cdssm']))
     ranking_task.metrics = [
         mz.metrics.NormalizedDiscountedCumulativeGain(k=3),
         mz.metrics.NormalizedDiscountedCumulativeGain(k=5),
         mz.metrics.MeanAveragePrecision()
     ]
-    # print("`ranking_task` initialized with metrics", ranking_task.metrics)
 
     padding_callback = mz.models.CDSSM.get_default_padding_callback(
         with_ngram=True,
@@ -29,11 +28,21 @@ def cdssm_train(train_set, valid_set, model_path):
         stage='dev',
         callback=padding_callback
     )
-
-    # In[7]:
+    test_loader = mz.dataloader.DataLoader(
+        dataset=test_set,
+        stage='dev',
+        callback=padding_callback
+    )
+    if ind_set:
+        ind_loader = mz.dataloader.DataLoader(
+            dataset=ind_set,
+            stage='dev',
+            callback=padding_callback
+        )
+    else:
+        ind_loader = None
 
     model = mz.models.CDSSM()
-
     model.params['task'] = ranking_task
     model.params['vocab_size'] = 19
     model.params['filters'] = 64
@@ -44,13 +53,9 @@ def cdssm_train(train_set, valid_set, model_path):
     model.params['mlp_num_fan_out'] = 64
     model.params['mlp_activation_func'] = 'tanh'
     model.params['dropout_rate'] = 0.8
-
     model.build()
-
     print(model)
     print('Trainable params: ', sum(p.numel() for p in model.parameters() if p.requires_grad))
-
-    # In[8]:
 
     optimizer = torch.optim.Adadelta(model.parameters())
 
@@ -64,9 +69,7 @@ def cdssm_train(train_set, valid_set, model_path):
         model_path=model_path
     )
 
-    # In[9]:
-
     trainer.run()
-    valid_prob = trainer.predict(valid_loader)
-    print(valid_prob)
     trainer.save_model()
+
+    return trainer, valid_loader, test_loader, ind_loader

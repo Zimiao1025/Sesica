@@ -82,7 +82,7 @@ def clf_predict(args, params):
                 test_prob = model.predict_proba(test_x)[:, 1]
                 prob_dict[top_n] = test_prob
                 metric_df = util_eval.evaluation(args.metrics, test_y, test_prob, test_g)
-                metric_df.to_csv(top_n + '_ind_results.csv')
+                metric_df.to_csv(model_path + top_n + '_ind_results.csv')
                 metric_list = metric_df.mean().tolist()
                 print('Independent test result of %s model: %s = %.4f\n' % (top_n, args.metrics[0], metric_list[0]))
 
