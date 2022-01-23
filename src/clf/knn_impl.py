@@ -25,7 +25,7 @@ def knn_train(train_x, train_y, val_x, val_y, val_g, model_path, params):
     # select top_n best model
     top_n = params['top_n']['knn']
     # save the best params to csv file
-    save_params(top_n, results_order, params['param_keys']['knn'], model_path)
+    save_params(top_n, results_order, params['clf_param_keys']['knn'], model_path)
     prob_dict = {}
     for i in range(top_n):
         hp = results_order[i][0]

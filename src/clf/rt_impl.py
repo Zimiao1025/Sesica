@@ -26,7 +26,7 @@ def rt_train(tree_model, train_x, train_y, val_x, val_y, val_g, model_path, para
     # select top_n best model
     top_n = params['top_n'][tree_model]
     # save the best params to csv file
-    save_params(top_n, results_order, params['param_keys'][tree_model], model_path)
+    save_params(top_n, results_order, params['clf_param_keys'][tree_model], model_path)
     prob_dict = {}
     for i in range(top_n):
         hp = results_order[i][0]

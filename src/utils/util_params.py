@@ -163,6 +163,12 @@ def clf_params_control(clf, args, params):
     return params
 
 
+def arc_params_control(arc, args, params):
+    if arc == 'arci':
+        params['arci_e'] = args.arci_e
+    return params
+
+
 def lr_params_check(cost, gs_mode=0):  # 2: meticulous; 1: 'rough'; 0: 'none'.
     if gs_mode == 0:
         if len(cost) == 1:

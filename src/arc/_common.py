@@ -17,20 +17,23 @@ def prob_metric_cal(trainer, model_path, valid_y, valid_loader, valid_g, test_y,
         ind_prob = None
     # save normalized prob and evaluation results.
     # valid
-    np.save(model_path + 'valid_prob.npy', normalize_prob(valid_prob))
-    print('normalize_prob: ', normalize_prob(valid_prob))
+    valid_prob = normalize_prob(valid_prob)
+    np.save(model_path + 'valid_prob.npy', valid_prob)
+    print('normalized valid prob: ', valid_prob)
     metric_df = evaluation(params['metrics'], valid_y, valid_prob, valid_g)
     metric_df.to_csv(model_path + 'valid_results.csv')
     metric_list = metric_df.mean().tolist()
     print('Evaluation on validation dataset: %s = %.4f\n' % (params['metrics'][0], metric_list[0]))
     # test
-    np.save(model_path + 'test_prob.npy', normalize_prob(test_prob))
+    test_prob = normalize_prob(test_prob)
+    np.save(model_path + 'test_prob.npy', test_prob)
     metric_df = evaluation(params['metrics'], test_y, test_prob, test_g)
     metric_list = metric_df.mean().tolist()
     print('Evaluation on testing dataset: %s = %.4f\n' % (params['metrics'][0], metric_list[0]))
     # ind
     if ind_prob:
-        np.save(model_path + 'ind_prob.npy', normalize_prob(ind_prob))
+        ind_prob = normalize_prob(ind_prob)
+        np.save(model_path + 'ind_prob.npy', ind_prob)
         metric_df = evaluation(params['metrics'], ind_y, ind_prob, ind_g)
         metric_list = metric_df.mean().tolist()
         metric_df.to_csv(model_path + 'ind_results.csv')

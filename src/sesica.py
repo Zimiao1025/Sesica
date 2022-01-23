@@ -196,7 +196,7 @@ def main(args):
     hetero_bmk(args)
     params = util_ctrl.params_base(args)
     # print(params)
-    arc_process.arc_train(args)
+    arc_process.arc_ctrl(args, params)
     # clf_process.clf_train(args, params)
     # clf_process.clf_test(args, params)
     # integration.int_or_rank(args, params)
@@ -212,7 +212,8 @@ if __name__ == '__main__':
     parse.add_argument('-bmk_vec', nargs='*', required=True, help="The input feature vector files.")
     parse.add_argument('-bmk_label', nargs='*', required=True,
                        help="The input files for positive and negative associations.")
-
+    parse.add_argument('-ind', choices=[True, False], default=False,
+                       help="The input files for positive and negative associations.")
     parse.add_argument('-clf', type=str, nargs='*',
                        choices=['rsvm', 'lsvm', 'rf', 'ert', 'knn', 'mnb', 'gbdt', 'dart', 'goss', 'mlp', 'none'],
                        default='none',
@@ -279,9 +280,11 @@ if __name__ == '__main__':
     parse.add_argument('-hls', type=int, default=[100], nargs='*',
                        help="Hidden layer sizes. The ith element represents the number of neurons in the ith hidden "
                             "layer.")
-
+    # parameters for arc
+    parse.add_argument('-num_neg', type=int, nargs='*', default=[4], help="Number of negative samples for ranking.")
+    parse.add_argument('-epoch', type=int, nargs='*', default=[10], help="Number of epochs for training.")
     parse.add_argument('-emb_in', type=int, default=[10000, 30000], nargs='*', help="Embedding size input.")
-
+    parse.add_argument('-arci_e', type=int, default=30001, help="Embedding size input for arci model.")
     # parameters for integration
     parse.add_argument('-integrate', type=str, choices=['de', 'ga', 'lr', 'ltr', 'none'], default='none',
                        help="Integrate by:\n"

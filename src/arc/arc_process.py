@@ -24,6 +24,8 @@ from arc.match_pyramid_impl import match_pyramid_train
 from arc.match_srnn_impl import match_srnn_train
 from arc.mv_lstm_impl import mv_lstm_train
 
+from utils.util_params import arc_params_control
+
 
 def trans_text(str_data_list):
     res = []
@@ -126,7 +128,7 @@ def arc_train_preprocess(args, arc):
         mode='point',
         batch_size=32
     )
-    if arc.ind is not None:
+    if args.ind:
         ind_data = trans_pd(args.data_dir + 'ind_df.csv', arc)
         ind_processed = mz.pack(ind_data)
         ind_set = mz.dataloader.Dataset(
@@ -147,7 +149,7 @@ def load_label_group(args):
     test_y = np.load(args.data_dir + 'test_y.npy')
     test_g = np.load(args.data_dir + 'test_g.npy')
 
-    if args.ind is not None:
+    if args.ind:
         ind_y = np.load(args.data_dir + 'ind_y.npy')
         ind_g = np.load(args.data_dir + 'ind_g.npy')
     else:
@@ -157,9 +159,10 @@ def load_label_group(args):
     return valid_y, valid_g, test_y, test_g, ind_y, ind_g
 
 
-def arc_train(args, params):
+def arc_ctrl(args, params):
     valid_y, valid_g, test_y, test_g, ind_y, ind_g = load_label_group(args)
     for arc in args.arc:
+        params = arc_params_control(arc, args, params)
         train_set, valid_set, test_set, ind_set = arc_train_preprocess(args, arc)
         if arc == 'anmm':
             trainer, valid_loader, test_loader, ind_loader = anmm_train(train_set, valid_set, test_set,

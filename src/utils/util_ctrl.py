@@ -67,7 +67,7 @@ def sp_ctrl(associations):
     return sp_associations
 
 
-def top_n_ctrl(clf, arc, top_n):
+def top_n_ctrl(clf, top_n):
     # top_n_order = [clf, arc]  ----  top --> list
     count = 0
     tmp_len = len(top_n)
@@ -76,14 +76,10 @@ def top_n_ctrl(clf, arc, top_n):
         for ml in clf:
             top_n_10[ml] = top_n[count] if count <= tmp_len - 1 else 1
             count += 1
-    if arc != 'none':
-        for dl in arc:
-            top_n_10[dl] = top_n[count] if count <= tmp_len - 1 else 1
-            count += 1
     return top_n_10
 
 
-def scale_ctrl(clf, arc, scale):
+def scale_ctrl(clf, scale):
     # scale = [mms, ss, ...,]  ----  scale --> list
     count = 0
     tmp_len = len(scale)
@@ -91,10 +87,6 @@ def scale_ctrl(clf, arc, scale):
     if clf != 'none':
         for ml in clf:
             scale_dict[ml] = scale[count] if count <= tmp_len - 1 else 'none'
-            count += 1
-    if arc != 'none':
-        for dl in arc:
-            scale_dict[dl] = scale[count] if count <= tmp_len - 1 else 'none'
             count += 1
     # EXTRA
     if 'svm' in clf:
@@ -113,7 +105,30 @@ def make_clf_pk():
             'mlp': ['act', 'hls']}
 
 
+def num_neg_ctrl(arc, num_neg):
+    count = 0
+    tmp_len = len(num_neg)
+    num_neg_dict = {}
+    if arc != 'none':
+        for dl in arc:
+            num_neg_dict[dl] = num_neg[count] if count <= tmp_len - 1 else 4  # 4
+            count += 1
+    return num_neg_dict
+
+
+def epoch_ctrl(arc, epoch):
+    count = 0
+    tmp_len = len(epoch)
+    epochs_dict = {}
+    if arc != 'none':
+        for dl in arc:
+            epochs_dict[dl] = epoch[count] if count <= tmp_len - 1 else 10  # 4
+            count += 1
+    return epochs_dict
+
+
 def params_base(args):
-    params = {'scale': scale_ctrl(args.clf, args.arc, args.scale), 'top_n': top_n_ctrl(args.clf, args.arc, args.top_n),
-              'metrics': args.metrics, 'param_keys': make_clf_pk()}
+    params = {'scale': scale_ctrl(args.clf, args.scale), 'top_n': top_n_ctrl(args.clf, args.top_n),
+              'metrics': args.metrics, 'clf_param_keys': make_clf_pk(), 'num_neg': num_neg_ctrl(args.arc, args.num_neg),
+              'epochs': epoch_ctrl(args.arc, args.epoch)}
     return params
