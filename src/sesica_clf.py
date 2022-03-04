@@ -1,5 +1,3 @@
-from collections import defaultdict
-
 import numpy as np
 import pandas as pd
 
@@ -7,49 +5,7 @@ from arc import arc_process
 # from clf import clf_process
 # from integrate import integration
 from plot import plot_process
-from utils import util_data, util_ctrl
-
-
-def load_homo_encodings(vec_file):
-    encodings = np.loadtxt(vec_file)
-    return encodings
-
-
-def load_hetero_encodings(vec_file):
-    a_encodings = np.loadtxt(vec_file[0])
-    b_encodings = np.loadtxt(vec_file[1])
-    return a_encodings, b_encodings
-
-
-def load_connections(label_file):
-    pos_pairs = np.loadtxt(label_file[0], dtype=int)
-    neg_pairs = np.loadtxt(label_file[1], dtype=int)
-    return pos_pairs, neg_pairs
-
-
-def unpack_associations(pos_pairs, neg_pairs):
-    # count the index list of a
-    index_list = []
-    pos_dict = defaultdict(list)
-    for pos_pair in pos_pairs:
-        a_index, b_index = pos_pair
-        index_list.append(a_index)
-        pos_dict[a_index].append(b_index)
-    neg_dict = defaultdict(list)
-
-    for neg_pair in neg_pairs:
-        a_index, b_index = neg_pair
-        index_list.append(a_index)
-        neg_dict[a_index].append(b_index)
-    index_list = list(set(index_list))
-
-    associations = {}
-    for index in index_list:
-        pos_connect = pos_dict[index] if index in pos_dict else []
-        neg_connect = neg_dict[index] if index in neg_dict else []
-        associations[index] = (pos_connect, neg_connect)
-
-    return np.array(index_list, dtype=int), associations
+from utils import util_data, util_ctrl, util_graph
 
 
 def data_clf_train(index_arr, sp_associations, a_encodings, b_encodings):
@@ -138,13 +94,13 @@ def data_arc_valid(index_arr, associations, a_encodings, b_encodings):
     return pd.DataFrame(data_dict_list), np.array(groups, dtype=int)
 
 
-def hetero_bmk(args):
+def clf_bmk(args):
     # heterogeneous graph <-- benchmark dataset
-    a_encodings, b_encodings = load_hetero_encodings(args.bmk_vec)
-    pos_pairs, neg_pairs = load_connections(args.bmk_label)
+    a_encodings, b_encodings = util_graph.load_hetero_encodings(args.bmk_vec)
+    pos_pairs, neg_pairs = util_graph.load_connections(args.bmk_label)
 
     # split dataset for parameter selection
-    index_list, associations = unpack_associations(pos_pairs, neg_pairs)
+    index_list, associations = util_graph.unpack_associations(pos_pairs, neg_pairs)
     train_index, valid_index, test_index = util_data.dataset_split(index_list)
 
     # prepare train dataset and valid dataset for ml or dl
@@ -174,26 +130,11 @@ def hetero_bmk(args):
         np.save(args.data_dir + 'test_y.npy', test_y)
         np.save(args.data_dir + 'test_g.npy', test_g)
 
-    if args.arc != 'none':
-        a_encodings = util_data.embedding_trunc(args.emb_in[0], a_encodings)
-        b_encodings = util_data.embedding_trunc(args.emb_in[1], b_encodings)
-        sp_associations = util_ctrl.sp_ctrl(associations)
-        train_df = data_arc_train(train_index, sp_associations, a_encodings, b_encodings)
-        valid_df, valid_g = data_arc_valid(valid_index, sp_associations, a_encodings, b_encodings)
-        test_df, test_g = data_arc_valid(test_index, sp_associations, a_encodings, b_encodings)
-        # save data for repeating experiment
-        train_df.to_csv(args.data_dir + 'train_df.csv')
-        valid_df.to_csv(args.data_dir + 'valid_df.csv')
-        test_df.to_csv(args.data_dir + 'test_df.csv')
-        # save group for ltr
-        np.save(args.data_dir + 'valid_g.npy', valid_g)
-        np.save(args.data_dir + 'test_g.npy', test_g)
-
 
 def main(args):
     print("\n******************************** Analysis ********************************\n")
     args = util_ctrl.path_ctrl(args)
-    hetero_bmk(args)
+    clf_bmk(args)
     params = util_ctrl.params_base(args)
     # print(params)
     arc_process.arc_ctrl(args, params)
@@ -210,33 +151,22 @@ if __name__ == '__main__':
 
     # parameters for
     parse.add_argument('-bmk_vec', nargs='*', required=True, help="The input feature vector files.")
+    parse.add_argument('-bmk_fasta', nargs='*', required=True, help="The input sequence files in fasta format.")
     parse.add_argument('-bmk_label', nargs='*', required=True,
                        help="The input files for positive and negative associations.")
     parse.add_argument('-ind', choices=[True, False], default=False,
                        help="The input files for positive and negative associations.")
     parse.add_argument('-clf', type=str, nargs='*',
-                       choices=['rsvm', 'lsvm', 'rf', 'ert', 'knn', 'mnb', 'gbdt', 'dart', 'goss', 'mlp', 'none'],
+                       choices=['svm', 'rf', 'ert', 'knn', 'mnb', 'gbdt', 'dart', 'goss', 'mlp', 'none'],
                        default='none',
                        help="The methods of calculating semantic similarity based on probability distribution:\n"
-                            " 'rsvm' --- Support Vector Machine with RBF kernel; 'rf' --- Random Forest;\n"
+                            " 'svm' --- Support Vector Machine with RBF kernel; 'rf' --- Random Forest;\n"
                             " 'ert' --- extremely randomized tree; 'knn' --- k-nearest neighbors vote;\n"
-                            " 'lsvm' --- Support Vector Machine with Linear kernel; 'mnb' ---Multinomial Naive Bayes;\n"
+                            " 'mnb' ---Multinomial Naive Bayes;\n"
                             " 'gbdt' --- traditional Gradient Boosting Decision Tree;\n"
                             " 'dart' --- Dropouts meet Multiple Additive Regression Trees;\n"
                             " 'goss' --- Gradient-based One-Side Sampling;\n"
                             " 'mlp' --- Multi-layer Perceptron.\n"
-                       )
-    parse.add_argument('-arc', type=str, nargs='*',
-                       choices=['arci', 'arcii', 'dssm', 'cdssm', 'drmm', 'none'],
-                       default='none',
-                       help="The methods of calculating semantic similarity based on probability distribution:\n"
-                            " 'svm'  --- Support Vector Machine; 'rf' --- Random Forest;\n"
-                            " 'ert'  --- extremely randomized tree; 'gnb' --- Gaussian Naive Bayes;\n"
-                            " 'mnb'  --- Multinomial Naive Bayes; 'bnb' --- Bernoulli Naive Bayes;\n"
-                            " 'gbdt' --- traditional Gradient Boosting Decision Tree;\n"
-                            " 'dart' --- Dropouts meet Multiple Additive Regression Trees;\n"
-                            " 'goss' --- Gradient-based One-Side Sampling;\n"
-                            " 'mlp'  --- Multi-layer Perceptron.\n"
                        )
     parse.add_argument('-scale', type=str, nargs='*', choices=['mms', 'ss', 'nor', 'none'], default=['none'],
                        help=" 'mms' --- scale with MinMaxScaler;\n"
@@ -280,23 +210,12 @@ if __name__ == '__main__':
     parse.add_argument('-hls', type=int, default=[100], nargs='*',
                        help="Hidden layer sizes. The ith element represents the number of neurons in the ith hidden "
                             "layer.")
-    # parameters for arc
-    parse.add_argument('-num_neg', type=int, nargs='*', default=[4], help="Number of negative samples for ranking.")
-    parse.add_argument('-epoch', type=int, nargs='*', default=[10], help="Number of epochs for training.")
-    parse.add_argument('-emb_in', type=int, default=[10000, 30000], nargs='*', help="Embedding size input.")
-    parse.add_argument('-arci_e', type=int, default=30001, help="Embedding size input for arci model.")
     # parameters for integration
-    parse.add_argument('-integrate', type=str, choices=['de', 'ga', 'lr', 'ltr', 'none'], default='none',
+    parse.add_argument('-integrate', type=str, choices=['ltr', 'none'], default='none',
                        help="Integrate by:\n"
                             " 'none' --- Without integration, the output is sorted directly according to the metric;\n"
-                            " 'de' --- differential evolution; 'ga' --- genetic algorithm;\n"
-                            " 'lr' --- logistic regression; 'ltr' --- Learning to rank with LambdaRank.\n"
+                            " 'ltr' --- Learning to rank with LambdaRank.\n"
                        )
-    # parameters for de and ga
-    parse.add_argument('-pop_size', type=int, default=10, help="Population size for 'DE' or 'GA'.")
-    parse.add_argument('-max_iter', type=int, default=100, help="Max iterations for 'DE' or 'GA'.")
-    # parameters for lr
-    parse.add_argument('-lr_c', type=int, default=[0], nargs='*', help="Regularization parameter of 'LR'.")
     # parameters for ltr
     parse.add_argument('-ltr_m', type=int, default=[0], nargs='*',
                        help="Maximum tree depth for base learners, <=0 means no limit.")

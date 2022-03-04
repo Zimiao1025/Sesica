@@ -4,9 +4,7 @@ import joblib
 import numpy as np
 import pandas as pd
 
-from integrate.lr_impl import lr_train
 from integrate.ltr_impl import ltr_train
-from integrate.wm_impl import weight_mean
 from utils import util_params, util_eval
 
 
@@ -66,11 +64,7 @@ def int_train(args, params):
 
     params = util_params.int_params_control(int_method, args, params)
 
-    if int_method in ['da', 'de']:
-        weight_mean(int_method, train_x, train_y, train_g, args.int_path, params)
-    elif int_method == 'lr':
-        lr_train(train_x, train_y, valid_x, valid_y, valid_g, args.int_path, params)
-    elif int_method == 'ltr':
+    if int_method == 'ltr':
         ltr_train(train_x, train_y, train_g, valid_x, valid_y, valid_g, args.int_path, params)
 
 
