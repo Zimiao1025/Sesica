@@ -4,7 +4,7 @@ import joblib
 import numpy as np
 import pandas as pd
 
-from integrate.ltr_impl import ltr_train
+from rank.ltr_impl import ltr_train
 from utils import util_params, util_eval
 
 

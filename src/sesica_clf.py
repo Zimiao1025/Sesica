@@ -1,9 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from arc import arc_process
-# from clf import clf_process
-# from integrate import integration
+from clf import clf_process
 from plot import plot_process
 from utils import util_data, util_ctrl, util_graph
 
@@ -137,11 +135,8 @@ def main(args):
     clf_bmk(args)
     params = util_ctrl.params_base(args)
     # print(params)
-    arc_process.arc_ctrl(args, params)
-    # clf_process.clf_train(args, params)
+    clf_process.clf_train(args, params)
     # clf_process.clf_test(args, params)
-    # integration.int_or_rank(args, params)
-    plot_process.plot_fig(args, False, params)
 
 
 if __name__ == '__main__':

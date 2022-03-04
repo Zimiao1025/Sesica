@@ -2,9 +2,6 @@ import numpy as np
 import pandas as pd
 
 from arc import arc_process
-# from clf import clf_process
-# from integrate import integration
-from plot import plot_process
 from utils import util_data, util_ctrl, util_graph, util_word
 
 
@@ -83,10 +80,6 @@ def main(args):
     params = util_ctrl.params_base(args)
     # print(params)
     arc_process.arc_ctrl(args, params)
-    # clf_process.clf_train(args, params)
-    # clf_process.clf_test(args, params)
-    # integration.int_or_rank(args, params)
-    plot_process.plot_fig(args, False, params)
 
 
 if __name__ == '__main__':
@@ -94,8 +87,7 @@ if __name__ == '__main__':
 
     parse = argparse.ArgumentParser(prog='Sesica', description="Step into analysis, please select parameters ")
 
-    # parameters for
-    parse.add_argument('-bmk_vec', nargs='*', required=True, help="The input feature vector files.")
+    # parameters for input
     parse.add_argument('-bmk_fasta', nargs='*', required=True, help="The input sequence files in fasta format.")
     parse.add_argument('-bmk_label', nargs='*', required=True,
                        help="The input files for positive and negative associations.")

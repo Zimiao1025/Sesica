@@ -1,0 +1,35 @@
+from rank.rank_process import int_or_rank
+from utils import util_ctrl
+
+
+def main(args):
+    print("\n******************************** RANK ********************************\n")
+    args = util_ctrl.path_ctrl(args)
+    params = util_ctrl.params_base(args)
+    int_or_rank(args, params)
+
+
+if __name__ == '__main__':
+    import argparse
+
+    parse = argparse.ArgumentParser(prog='Sesica', description="Step into analysis, please select parameters ")
+
+    # parameters for
+    parse.add_argument('-ind', choices=[True, False], default=False,
+                       help="The input files for positive and negative associations.")
+    parse.add_argument('-method', type=str, nargs='*',
+                       choices=['svm', 'rf', 'ert', 'knn', 'mnb', 'gbdt', 'dart', 'goss', 'mlp', 'none'],
+                       default='none',)
+    # parameters for integration
+    parse.add_argument('-integrate', type=str, choices=['ltr', 'none'], default='none',
+                       help="Integrate by:\n"
+                            " 'none' --- Without integration, the output is sorted directly according to the metric;\n"
+                            " 'ltr' --- Learning to rank with LambdaRank.\n"
+                       )
+    # parameters for ltr
+    parse.add_argument('-ltr_m', type=int, default=[0], nargs='*',
+                       help="Maximum tree depth for base learners, <=0 means no limit.")
+    parse.add_argument('-ltr_t', type=int, default=[100], nargs='*', help="Number of boosted trees to fit.")
+    parse.add_argument('-ltr_n', type=int, default=[31], nargs='*', help="Maximum tree leaves for base learners.")
+    argv = parse.parse_args()
+    main(argv)
