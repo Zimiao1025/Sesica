@@ -5,7 +5,7 @@ import matchzoo as mz
 
 def arcii_train(train_set, valid_set, test_set, model_path, ind_set=None, params=None):
     # Make use of MatchZoo customized loss functions and evaluation metrics to define a task:
-    ranking_task = mz.tasks.Ranking(losses=mz.losses.RankCrossEntropyLoss(num_neg=params['num_neg']['arcii']))
+    ranking_task = mz.tasks.Ranking(losses=mz.losses.RankCrossEntropyLoss(num_neg=params['arcii_neg']))
     ranking_task.metrics = [
         mz.metrics.NormalizedDiscountedCumulativeGain(k=3),
         mz.metrics.NormalizedDiscountedCumulativeGain(k=5),
@@ -46,20 +46,14 @@ def arcii_train(train_set, valid_set, test_set, model_path, ind_set=None, params
     model = mz.models.ArcII()
 
     model.params['task'] = ranking_task
-    model.params['embedding'] = np.empty([10000, 100], dtype=float)
-    model.params['left_length'] = 10
-    model.params['right_length'] = 100
-    model.params['kernel_1d_count'] = 32
-    model.params['kernel_1d_size'] = 3
-    model.params['kernel_2d_count'] = [64, 64]
-    model.params['kernel_2d_size'] = [(3, 3), (3, 3)]
-    model.params['pool_2d_size'] = [(3, 3), (3, 3)]
-    model.params['dropout_rate'] = 0.3
+    model.params['embedding_input_dim'] = params['arcii_emb_in']
+    model.params['embedding_output_dim'] = params['arcii_emb_out']
+    model.params['dropout_rate'] = params['arcii_dropout']
     model.build()
     print(model)
     print('Trainable params: ', sum(p.numel() for p in model.parameters() if p.requires_grad))
 
-    optimizer = torch.optim.Adam(model.parameters())
+    optimizer = torch.optim.Adam(model.parameters(), lr=params['arcii_lr'])
 
     trainer = mz.trainers.Trainer(
         model=model,
@@ -67,7 +61,7 @@ def arcii_train(train_set, valid_set, test_set, model_path, ind_set=None, params
         trainloader=train_loader,
         validloader=valid_loader,
         validate_interval=None,
-        epochs=10,
+        epochs=params['arcii_epoch'],
         model_path=model_path
     )
 

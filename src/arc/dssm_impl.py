@@ -39,7 +39,7 @@ def dssm_train(train_set, valid_set, test_set, model_path, ind_set=None, params=
 
     model = mz.models.DSSM()
     model.params['task'] = ranking_task
-    model.params['vocab_size'] = 19  # preprocessor.context['ngram_vocab_size'] --> embedding_input_dim
+    model.params['vocab_size'] = params['dssm_emb_in']
     model.params['mlp_num_layers'] = 3
     model.params['mlp_num_units'] = 300
     model.params['mlp_num_fan_out'] = 128
@@ -48,7 +48,7 @@ def dssm_train(train_set, valid_set, test_set, model_path, ind_set=None, params=
     print(model)
     print('Trainable params: ', sum(p.numel() for p in model.parameters() if p.requires_grad))
 
-    optimizer = torch.optim.Adam(model.parameters())
+    optimizer = torch.optim.Adam(model.parameters(), lr=params['dssm_lr'])
 
     trainer = mz.trainers.Trainer(
         model=model,
@@ -56,7 +56,7 @@ def dssm_train(train_set, valid_set, test_set, model_path, ind_set=None, params=
         trainloader=train_loader,
         validloader=valid_loader,
         validate_interval=None,
-        epochs=10,
+        epochs=params['dssm_epoch'],
         model_path=model_path,
     )
 

@@ -4,7 +4,7 @@ from utils import util_ctrl
 
 def main(args):
     print("\n******************************** RANK ********************************\n")
-    args = util_ctrl.path_ctrl(args)
+    args = util_ctrl.rank_path_ctrl(args)
     params = util_ctrl.params_base(args)
     int_or_rank(args, params)
 
@@ -21,8 +21,8 @@ if __name__ == '__main__':
                        choices=['svm', 'rf', 'ert', 'knn', 'mnb', 'gbdt', 'dart', 'goss', 'mlp', 'none'],
                        default='none',)
     # parameters for integration
-    parse.add_argument('-integrate', type=str, choices=['ltr', 'none'], default='none',
-                       help="Integrate by:\n"
+    parse.add_argument('-rank', type=str, choices=['ltr', 'none'], default='none',
+                       help="Rank by:\n"
                             " 'none' --- Without integration, the output is sorted directly according to the metric;\n"
                             " 'ltr' --- Learning to rank with LambdaRank.\n"
                        )

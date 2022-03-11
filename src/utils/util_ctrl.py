@@ -20,33 +20,50 @@ def path_check(target_dir):
     return target_dir
 
 
-def path_ctrl(args):
+def clf_path_ctrl(args):
     args.base_dir = os.path.dirname(os.getcwd()) + '/'
-    print("*Note that all files and models will be generated in the 'result' directory!!!\n")
     args.res_dir = args.base_dir + 'result/'
     # create directory for processed input data
-    args.data_dir = path_check(args.res_dir + 'bmk_data/')
-    # create directory for scale model
-    args.scale_path = path_check(args.res_dir + 'scale/')
+    args.data_dir = path_check(args.res_dir + 'clf_data/')
     # create directory for each classifier
-    args.ssc_path = {}
     if args.clf != 'none':
+        # create directory for scale model
+        args.scale_path = path_check(args.res_dir + 'scale/')
         args.clf_path = {}
         for clf in args.clf:
             args.clf_path[clf] = path_check(args.res_dir + clf + '/')
-            args.ssc_path[clf] = args.res_dir + clf + '/'
+    return args
+
+
+def arc_path_ctrl(args):
+    args.base_dir = os.path.dirname(os.getcwd()) + '/'
+    args.res_dir = args.base_dir + 'result/'
+    # create directory for processed input data
+    args.data_dir = path_check(args.res_dir + 'arc_data/')
     # create directory for each deep-learning arc
     if args.arc != 'none':
         args.arc_path = {}
         for arc in args.arc:
             args.arc_path[arc] = path_check(args.res_dir + arc + '/')
-            args.ssc_path[arc] = args.res_dir + arc + '/'
+    return args
 
-    if args.integrate == 'none':
+
+def rank_path_ctrl(args):
+    args.base_dir = os.path.dirname(os.getcwd()) + '/'
+    args.res_dir = args.base_dir + 'result/'
+    # create directory for ranking
+    if args.rank == 'none':
         if len(args.clf) >= 2:
             args.no_int_path = path_check(args.res_dir + 'no_int/')
     else:
         args.int_path = path_check(args.res_dir + args.integrate + '_int/')
+    return args
+
+
+def plot_path_ctrl(args):
+    args.base_dir = os.path.dirname(os.getcwd()) + '/'
+    args.res_dir = args.base_dir + 'result/'
+    # create directory for plotting
     if args.plot != 'none':
         args.fig_dir = path_check(args.res_dir + 'plot/')
 
@@ -105,30 +122,12 @@ def make_clf_pk():
             'mlp': ['act', 'hls']}
 
 
-def num_neg_ctrl(arc, num_neg):
-    count = 0
-    tmp_len = len(num_neg)
-    num_neg_dict = {}
-    if arc != 'none':
-        for dl in arc:
-            num_neg_dict[dl] = num_neg[count] if count <= tmp_len - 1 else 4  # 4
-            count += 1
-    return num_neg_dict
-
-
-def epoch_ctrl(arc, epoch):
-    count = 0
-    tmp_len = len(epoch)
-    epochs_dict = {}
-    if arc != 'none':
-        for dl in arc:
-            epochs_dict[dl] = epoch[count] if count <= tmp_len - 1 else 10  # 4
-            count += 1
-    return epochs_dict
-
-
-def params_base(args):
+def params_clf(args):
     params = {'scale': scale_ctrl(args.clf, args.scale), 'top_n': top_n_ctrl(args.clf, args.top_n),
-              'metrics': args.metrics, 'clf_param_keys': make_clf_pk(), 'num_neg': num_neg_ctrl(args.arc, args.num_neg),
-              'epochs': epoch_ctrl(args.arc, args.epoch)}
+              'metrics': args.metrics, 'clf_param_keys': make_clf_pk()}
+    return params
+
+
+def params_arc(args):
+    params = {'metrics': args.metrics}
     return params

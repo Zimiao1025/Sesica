@@ -66,27 +66,23 @@ def trans_pd(file_name, arc):
     label_list = list(map(float, pd_data['label'].values))
 
     if arc == 'dssm':
-        left_vec = 'ngram_left'
-        right_vec = 'ngram_right'
         data = {'id_left': pd.Series(id_left_list),
                 'text_left': pd.Series(text_left_list),
-                left_vec: pd.Series(text_left_list),
+                'ngram_left': pd.Series(text_left_list),
                 'length_left': pd.Series(length_left_list),
                 'id_right': pd.Series(id_right_list),
                 'text_right': pd.Series(text_left_list),
-                right_vec: pd.Series(text_right_list),
+                'ngram_right': pd.Series(text_right_list),
                 'length_right': pd.Series(length_right_list),
                 'label': pd.Series(label_list)}
     elif arc == 'cdssm':
-        left_vec = 'ngram_left'
-        right_vec = 'ngram_right'
         data = {'id_left': pd.Series(id_left_list),
                 'text_left': pd.Series(text_left_list),
-                left_vec: pd.Series(ngram_left_list),
+                'ngram_left': pd.Series(ngram_left_list),
                 'length_left': pd.Series(length_left_list),
                 'id_right': pd.Series(id_right_list),
                 'text_right': pd.Series(text_left_list),
-                right_vec: pd.Series(ngram_right_list),
+                'ngram_right': pd.Series(ngram_right_list),
                 'length_right': pd.Series(length_right_list),
                 'label': pd.Series(label_list)}
     else:
@@ -101,7 +97,7 @@ def trans_pd(file_name, arc):
     return pd.DataFrame(data)
 
 
-def arc_train_preprocess(args, arc):
+def arc_train_preprocess(args, arc, params):
     # Prepare input data:
     train_data = trans_pd(args.data_dir + 'train_df.csv', arc)
     valid_data = trans_pd(args.data_dir + 'valid_df.csv', arc)
@@ -115,7 +111,7 @@ def arc_train_preprocess(args, arc):
         data_pack=train_processed,
         mode='pair',
         num_dup=1,
-        num_neg=4,
+        num_neg=params['num_neg'][arc],
         batch_size=32
     )
     valid_set = mz.dataloader.Dataset(
@@ -163,64 +159,83 @@ def arc_ctrl(args, params):
     valid_y, valid_g, test_y, test_g, ind_y, ind_g = load_label_group(args)
     for arc in args.arc:
         params = arc_params_control(arc, args, params)
-        train_set, valid_set, test_set, ind_set = arc_train_preprocess(args, arc)
+
         if arc == 'anmm':
+            train_set, valid_set, test_set, ind_set = arc_train_preprocess(args, arc, params)
             trainer, valid_loader, test_loader, ind_loader = anmm_train(train_set, valid_set, test_set,
                                                                         args.arc_path[arc], ind_set, params)
         elif arc == 'arci':
+            train_set, valid_set, test_set, ind_set = arc_train_preprocess(args, arc, params)
             trainer, valid_loader, test_loader, ind_loader = arci_train(train_set, valid_set, test_set,
                                                                         args.arc_path[arc], ind_set, params)
         elif arc == 'arcii':
+            train_set, valid_set, test_set, ind_set = arc_train_preprocess(args, arc, params)
             trainer, valid_loader, test_loader, ind_loader = arcii_train(train_set, valid_set, test_set,
                                                                          args.arc_path[arc], ind_set, params)
         elif arc == 'bimpm':
+            train_set, valid_set, test_set, ind_set = arc_train_preprocess(args, arc, params)
             trainer, valid_loader, test_loader, ind_loader = bimpm_train(train_set, valid_set, test_set,
                                                                          args.arc_path[arc], ind_set, params)
         elif arc == 'dssm':
+            train_set, valid_set, test_set, ind_set = arc_train_preprocess(args, arc, params)
             trainer, valid_loader, test_loader, ind_loader = dssm_train(train_set, valid_set, test_set,
                                                                         args.arc_path[arc], ind_set, params)
         elif arc == 'cdssm':
+            train_set, valid_set, test_set, ind_set = arc_train_preprocess(args, arc, params)
             trainer, valid_loader, test_loader, ind_loader = cdssm_train(train_set, valid_set, test_set,
                                                                          args.arc_path[arc], ind_set, params)
         elif arc == 'conv_knrm':
+            train_set, valid_set, test_set, ind_set = arc_train_preprocess(args, arc, params)
             trainer, valid_loader, test_loader, ind_loader = conv_knrm_train(train_set, valid_set, test_set,
                                                                              args.arc_path[arc], ind_set, params)
         elif arc == 'diin':
+            train_set, valid_set, test_set, ind_set = arc_train_preprocess(args, arc, params)
             trainer, valid_loader, test_loader, ind_loader = diin_train(train_set, valid_set, test_set,
                                                                         args.arc_path[arc], ind_set, params)
         elif arc == 'drmm':
+            train_set, valid_set, test_set, ind_set = arc_train_preprocess(args, arc, params)
             trainer, valid_loader, test_loader, ind_loader = drmm_train(train_set, valid_set, test_set,
                                                                         args.arc_path[arc], ind_set, params)
         elif arc == 'drmmtks':
+            train_set, valid_set, test_set, ind_set = arc_train_preprocess(args, arc, params)
             trainer, valid_loader, test_loader, ind_loader = drmmtks_train(train_set, valid_set, test_set,
                                                                            args.arc_path[arc], ind_set, params)
         elif arc == 'duet':
+            train_set, valid_set, test_set, ind_set = arc_train_preprocess(args, arc, params)
             trainer, valid_loader, test_loader, ind_loader = duet_train(train_set, valid_set, test_set,
                                                                         args.arc_path[arc], ind_set, params)
         elif arc == 'esim':
+            train_set, valid_set, test_set, ind_set = arc_train_preprocess(args, arc, params)
             trainer, valid_loader, test_loader, ind_loader = esim_train(train_set, valid_set, test_set,
                                                                         args.arc_path[arc], ind_set, params)
         elif arc == 'hbmp':
+            train_set, valid_set, test_set, ind_set = arc_train_preprocess(args, arc, params)
             trainer, valid_loader, test_loader, ind_loader = hbmp_train(train_set, valid_set, test_set,
                                                                         args.arc_path[arc], ind_set, params)
         elif arc == 'knrm':
+            train_set, valid_set, test_set, ind_set = arc_train_preprocess(args, arc, params)
             trainer, valid_loader, test_loader, ind_loader = knrm_train(train_set, valid_set, test_set,
                                                                         args.arc_path[arc], ind_set, params)
         elif arc == 'match_lstm':
+            train_set, valid_set, test_set, ind_set = arc_train_preprocess(args, arc, params)
             trainer, valid_loader, test_loader, ind_loader = match_lstm_train(train_set, valid_set, test_set,
                                                                               args.arc_path[arc], ind_set, params)
         elif arc == 'match_pyramid':
+            train_set, valid_set, test_set, ind_set = arc_train_preprocess(args, arc, params)
             trainer, valid_loader, test_loader, ind_loader = match_pyramid_train(train_set, valid_set, test_set,
                                                                                  args.arc_path[arc], ind_set, params)
         elif arc == 'match_srnn':
+            train_set, valid_set, test_set, ind_set = arc_train_preprocess(args, arc, params)
             trainer, valid_loader, test_loader, ind_loader = match_srnn_train(train_set, valid_set, test_set,
                                                                               args.arc_path[arc], ind_set, params)
         elif arc == 'mv_lstm':
+            train_set, valid_set, test_set, ind_set = arc_train_preprocess(args, arc, params)
             trainer, valid_loader, test_loader, ind_loader = mv_lstm_train(train_set, valid_set, test_set,
                                                                            args.arc_path[arc], ind_set, params)
         else:
             print('Arc error')
-            trainer, valid_loader, test_loader, ind_loader = None, None, None, None
+            # trainer, valid_loader, test_loader, ind_loader = None, None, None, None
+            return False
 
         # calculate the predict prob and evaluation result
         prob_metric_cal(trainer, args.arc_path[arc], valid_y, valid_loader, valid_g, test_y, test_loader, test_g,

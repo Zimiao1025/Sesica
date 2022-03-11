@@ -62,9 +62,8 @@ def int_train(args, params):
     print('Start integration......\n')
     int_method = args.integrate
 
-    params = util_params.int_params_control(int_method, args, params)
-
     if int_method == 'ltr':
+        params = util_params.rank_params_control(args, params)
         ltr_train(train_x, train_y, train_g, valid_x, valid_y, valid_g, args.int_path, params)
 
 

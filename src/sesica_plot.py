@@ -4,7 +4,7 @@ from utils import util_ctrl
 
 def main(args):
     print("\n******************************** PLOT ********************************\n")
-    args = util_ctrl.path_ctrl(args)
+    args = util_ctrl.plot_path_ctrl(args)
     params = util_ctrl.params_base(args)
     plot_process.plot_fig(args, False, params)
 

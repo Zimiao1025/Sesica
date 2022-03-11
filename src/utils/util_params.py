@@ -164,29 +164,20 @@ def clf_params_control(clf, args, params):
 
 
 def arc_params_control(arc, args, params):
+    params['num_neg'] = {}
     if arc == 'arci':
-        params['arci_e'] = args.arci_e
-    return params
-
-
-def lr_params_check(cost, gs_mode=0):  # 2: meticulous; 1: 'rough'; 0: 'none'.
-    if gs_mode == 0:
-        if len(cost) == 1:
-            c_range = range(cost[0], cost[0] + 1, 1)
-        elif len(cost) == 2:
-            c_range = range(cost[0], cost[1] + 1, 1)
-        elif len(cost) == 3:
-            c_range = range(cost[0], cost[1] + 1, cost[2])
+        params['num_neg']['arci'] = args.arci_neg
+        params['arci_epoch'] = args.arci_epoch
+        params['arci_dropout'] = args.arci_dropout
+        params['arci_lr'] = args.arci_lr
+        params['arci_layers'] = args.arci_layers
+        params['arci_units'] = args.arci_units
+        params['arci_emb_out'] = args.arci_emb
+        if args.category == 'Protein':
+            params['arci_emb_in'] = 21 ** args.word_size
         else:
-            error_info = 'The number of input value of parameter "lr_c" should be no more than 3!'
-            sys.stderr.write(error_info)
-            return False
-    elif gs_mode == 1:
-        c_range = range(-5, 11, 3)
-    else:
-        c_range = range(-5, 11, 1)
-
-    return c_range
+            params['arci_emb_in'] = 5 ** args.word_size
+    return params
 
 
 def ltr_params_check(max_depth, n_estimators, num_leaves, gs_mode=0):
@@ -240,14 +231,6 @@ def ltr_params_check(max_depth, n_estimators, num_leaves, gs_mode=0):
     return m_range, t_range, n_range
 
 
-def int_params_control(int_method, args, params):
-    if int_method == 'lr':
-        params['lr_c'] = lr_params_check(args.lr_c, args.gs_mode)
-    elif int_method == 'ltr':
-        params['ltr_m'], params['ltr_t'], params['ltr_n'] = ltr_params_check(args.ltr_m, args.ltr_t, args.ltr_n,
+def rank_params_control(args, params):
+    params['ltr_m'], params['ltr_t'], params['ltr_n'] = ltr_params_check(args.ltr_m, args.ltr_t, args.ltr_n,
                                                                              args.gs_mode)
-    else:
-        # 不推荐进行遍历
-        params['pop_size'] = args.pop_size
-        params['max_iter'] = args.max_iter
-    return params

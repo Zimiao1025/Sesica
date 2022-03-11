@@ -1,8 +1,6 @@
 import numpy as np
-import pandas as pd
 
 from clf import clf_process
-from plot import plot_process
 from utils import util_data, util_ctrl, util_graph
 
 
@@ -40,56 +38,6 @@ def data_clf_valid(index_arr, associations, a_encodings, b_encodings):
             labels.append(0.0)
         groups.append(len(associations[index][0]) + len(associations[index][1]))
     return np.array(vectors, dtype=float), np.array(labels, dtype=float), np.array(groups, dtype=int)
-
-
-def data_arc_train(index_arr, associations, a_encodings, b_encodings):
-    # ,id_left,text_left,length_left,id_right,text_right,length_right,label
-    left_len = len(a_encodings[0])
-    right_len = len(b_encodings[0])
-    length = len(index_arr)
-    data_dict_list = []
-    for i in range(length):
-        index = index_arr[i]
-        id_left = 'Q' + str(index)
-        for pos_index in associations[index][0]:
-            id_right = id_left + '-' + str(pos_index)
-            tmp_dict = {'id_left': id_left, 'text_left': a_encodings[index], 'length_left': left_len,
-                        'id_right': id_right, 'text_right': b_encodings[pos_index], 'length_right': right_len,
-                        'label': 1.0}
-            data_dict_list.append(tmp_dict)
-        for neg_index in associations[index][1]:
-            id_right = id_left + '-' + str(neg_index)
-            tmp_dict = {'id_left': id_left, 'text_left': a_encodings[index], 'length_left': left_len,
-                        'id_right': id_right, 'text_right': b_encodings[neg_index], 'length_right': right_len,
-                        'label': 0.0}
-            data_dict_list.append(tmp_dict)
-    return pd.DataFrame(data_dict_list)
-
-
-def data_arc_valid(index_arr, associations, a_encodings, b_encodings):
-    # ,id_left,text_left,length_left,id_right,text_right,length_right,label
-    left_len = len(a_encodings[0])
-    right_len = len(b_encodings[0])
-    length = len(index_arr)
-    data_dict_list = []
-    groups = []
-    for i in range(length):
-        index = index_arr[i]
-        id_left = 'Q' + str(index)
-        for pos_index in associations[index][0]:
-            id_right = id_left + '-' + str(pos_index)
-            tmp_dict = {'id_left': id_left, 'text_left': a_encodings[index], 'length_left': left_len,
-                        'id_right': id_right, 'text_right': b_encodings[pos_index], 'length_right': right_len,
-                        'label': 1.0}
-            data_dict_list.append(tmp_dict)
-        for neg_index in associations[index][1]:
-            id_right = id_left + '-' + str(neg_index)
-            tmp_dict = {'id_left': id_left, 'text_left': a_encodings[index], 'length_left': left_len,
-                        'id_right': id_right, 'text_right': b_encodings[neg_index], 'length_right': right_len,
-                        'label': 0.0}
-            data_dict_list.append(tmp_dict)
-        groups.append(len(associations[index][0]) + len(associations[index][1]))
-    return pd.DataFrame(data_dict_list), np.array(groups, dtype=int)
 
 
 def clf_bmk(args):
@@ -131,12 +79,14 @@ def clf_bmk(args):
 
 def main(args):
     print("\n******************************** Analysis ********************************\n")
-    args = util_ctrl.path_ctrl(args)
+    args = util_ctrl.clf_path_ctrl(args)
     clf_bmk(args)
-    params = util_ctrl.params_base(args)
+    params = util_ctrl.params_clf(args)
     # print(params)
     clf_process.clf_train(args, params)
-    # clf_process.clf_test(args, params)
+    clf_process.clf_test(args, params)
+    if args.ind:
+        clf_process.clf_predict(args, params)
 
 
 if __name__ == '__main__':
@@ -145,23 +95,27 @@ if __name__ == '__main__':
     parse = argparse.ArgumentParser(prog='Sesica', description="Step into analysis, please select parameters ")
 
     # parameters for
-    parse.add_argument('-bmk_vec', nargs='*', required=True, help="The input feature vector files.")
-    parse.add_argument('-bmk_fasta', nargs='*', required=True, help="The input sequence files in fasta format.")
+    parse.add_argument('-bmk_vec', nargs='*', required=True, help="The feature vector files of benchmark datasets.")
     parse.add_argument('-bmk_label', nargs='*', required=True,
-                       help="The input files for positive and negative associations.")
-    parse.add_argument('-ind', choices=[True, False], default=False,
-                       help="The input files for positive and negative associations.")
+                       help="The input files for positive and negative associations of benchmark datasets.")
+    parse.add_argument('-ind', choices=[True, False], default=False, help="Input independent test dataset or not.")
+    parse.add_argument('-ind_vec', nargs='*', help="The feature vector files of independent datasets.")
+    parse.add_argument('-ind_label', nargs='*',
+                       help="The input files for positive and negative associations of independent datasets.")
     parse.add_argument('-clf', type=str, nargs='*',
                        choices=['svm', 'rf', 'ert', 'knn', 'mnb', 'gbdt', 'dart', 'goss', 'mlp', 'none'],
                        default='none',
                        help="The methods of calculating semantic similarity based on probability distribution:\n"
-                            " 'svm' --- Support Vector Machine with RBF kernel; 'rf' --- Random Forest;\n"
-                            " 'ert' --- extremely randomized tree; 'knn' --- k-nearest neighbors vote;\n"
+                            " 'svm' --- Support Vector Machine with RBF kernel;\n"
+                            " 'rf' --- Random Forest;\n"
+                            " 'ert' --- extremely randomized tree;\n"
+                            " 'knn' --- k-nearest neighbors vote;\n"
                             " 'mnb' ---Multinomial Naive Bayes;\n"
                             " 'gbdt' --- traditional Gradient Boosting Decision Tree;\n"
                             " 'dart' --- Dropouts meet Multiple Additive Regression Trees;\n"
                             " 'goss' --- Gradient-based One-Side Sampling;\n"
-                            " 'mlp' --- Multi-layer Perceptron.\n"
+                            " 'mlp' --- Multi-layer Perceptron;\n"
+                            " 'none' --- none of model will be selected.\n"
                        )
     parse.add_argument('-scale', type=str, nargs='*', choices=['mms', 'ss', 'nor', 'none'], default=['none'],
                        help=" 'mms' --- scale with MinMaxScaler;\n"
@@ -176,10 +130,10 @@ if __name__ == '__main__':
                                                                  'ndcg@50', 'roc@50'], default=['aupr'],
                        help="The metrics for parameters selection")
     parse.add_argument('-top_n', type=int, nargs='*', default=[1],
-                       help="Select the n best scores for specific metric.")
+                       help="Select the n best models for specific metric of different methods.")
     # parameters for svm
     parse.add_argument('-svm_c', type=int, default=[0], nargs='*', help="Regularization parameter of 'RSVM'.")
-    parse.add_argument('-svm_g', type=int, default=[1], nargs='*', help="Kernel coefficient for 'rbf' of 'RSVM'.")
+    parse.add_argument('-svm_g', type=int, default=[1], nargs='*', help="Kernel coefficient of 'RSVM'.")
     # parameters for rf
     parse.add_argument('-rf_t', type=int, default=[100], nargs='*', help="Number of boosted trees to fit.")
     # parameters for ert
@@ -205,29 +159,5 @@ if __name__ == '__main__':
     parse.add_argument('-hls', type=int, default=[100], nargs='*',
                        help="Hidden layer sizes. The ith element represents the number of neurons in the ith hidden "
                             "layer.")
-    # parameters for integration
-    parse.add_argument('-integrate', type=str, choices=['ltr', 'none'], default='none',
-                       help="Integrate by:\n"
-                            " 'none' --- Without integration, the output is sorted directly according to the metric;\n"
-                            " 'ltr' --- Learning to rank with LambdaRank.\n"
-                       )
-    # parameters for ltr
-    parse.add_argument('-ltr_m', type=int, default=[0], nargs='*',
-                       help="Maximum tree depth for base learners, <=0 means no limit.")
-    parse.add_argument('-ltr_t', type=int, default=[100], nargs='*', help="Number of boosted trees to fit.")
-    parse.add_argument('-ltr_n', type=int, default=[31], nargs='*', help="Maximum tree leaves for base learners.")
-    parse.add_argument('-plot', type=str, choices=['prc', 'roc', 'box', 'polar', 'hp', '3d', 'dist', 'pie', 'bar',
-                                                   'none'], default='none', nargs='*',
-                       help="Integrate by:\n"
-                            " 'none' --- Don't plot;\n"
-                            " 'prc' --- precision-recall Curve; 'roc' --- receiver operating characteristic;\n"
-                            " 'box' --- box figure for evaluation results; 'hp' --- heat map of the relevance.\n"
-                            " '3d' --- 3d figure for dimension reduce; 'dist' --- histogram for distribution.\n"
-                            " 'pie' --- pie figure for optimal weight; 'bar' --- histogram for feature importance.\n"
-                       )
-    parse.add_argument('-plot_metric', type=str, choices=['aupr', 'auc', 'ndcg@k', 'roc@k', 'metric_1'],
-                       default='metric_1', help="The metrics for plot, the -plot_metric should be a metric included in "
-                                                "-metric parameter you chose before. The metric_1 means the first "
-                                                "metric you chose in -metrics parameter")
     argv = parse.parse_args()
     main(argv)
