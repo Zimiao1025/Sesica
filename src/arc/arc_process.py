@@ -33,55 +33,80 @@ def trans_text(str_data_list):
     for str_data in str_data_list:
         str_list = re.findall('\d+', str_data)
         num_list = list(map(int, str_list))
-        num_arr = np.array(num_list, dtype=np.float32)[:19]
+        num_arr = np.array(num_list, dtype=np.float32)
         res.append(num_arr)
-
+    print('Shape of text: ', np.array(res).shape)
     return res
 
 
-def trans_ngram(str_data_list):
+def trans_ngram(str_data_list, ngram=3):
     res = []
 
     for str_data in str_data_list:
         str_list = re.findall('\d+', str_data)
         num_list = list(map(int, str_list))
-        num_arr = np.array(num_list, dtype=np.float32)[:18].reshape(3, 6)
-        res.append(num_arr)
-
+        num_arr = []
+        for i in range(len(num_list)):
+            if i < len(num_list) - ngram + 1:
+                gram = num_list[i: i + ngram]
+            else:
+                gram = num_list[i: len(num_list)] + [0] * (ngram - (len(num_list) - i))
+            num_arr.append(gram)
+        res.append(np.array(num_arr, dtype=np.float))
+    print('Shape of n-gram: ', np.array(res).shape)
     return res
 
 
-def trans_pd(file_name, arc):
+def trans_hist(str_data_list_left, str_data_list_right, bin_size):
+
+    res_left = trans_ngram(str_data_list_left, 5)
+    res_right = trans_ngram(str_data_list_right, 5)
+    res_len = len(res_right[0])
+    for left_text, right_text in zip(res_left, res_right):
+        for i in range(res_len):
+            score_list = []
+            for j in range(res_len):
+                score = np.dot(left_text[i], right_text[j]) / (np.linalg.norm(left_text[i]) * (np.linalg.norm(right_text[j])))
+                score_list.append(score)
+
+    # print('Shape of n-gram: ', np.array(res).shape)
+    # return res
+
+
+def trans_pd(file_name, arc, params):
     pd_data = pd.read_csv(file_name)
+
     id_left_list = pd_data['id_left'].values
     text_left_list = trans_text(pd_data['text_left'].values)
-    ngram_left_list = trans_ngram(pd_data['text_left'].values)
     length_left_list = list(map(int, pd_data['length_left'].values))
 
     id_right_list = pd_data['id_right'].values
     text_right_list = trans_text(pd_data['text_right'].values)
-    ngram_right_list = trans_ngram(pd_data['text_right'].values)
     length_right_list = list(map(int, pd_data['length_right'].values))
 
     label_list = list(map(float, pd_data['label'].values))
 
     if arc == 'dssm':
+        # ngram_left_list = trans_ngram(pd_data['text_left'].values, params['ngram'])
+        # ngram_right_list = trans_ngram(pd_data['text_right'].values, params['ngram'])
         data = {'id_left': pd.Series(id_left_list),
                 'text_left': pd.Series(text_left_list),
                 'ngram_left': pd.Series(text_left_list),
                 'length_left': pd.Series(length_left_list),
                 'id_right': pd.Series(id_right_list),
-                'text_right': pd.Series(text_left_list),
+                'text_right': pd.Series(text_right_list),
                 'ngram_right': pd.Series(text_right_list),
                 'length_right': pd.Series(length_right_list),
                 'label': pd.Series(label_list)}
     elif arc == 'cdssm':
+        ngram_left_list = trans_ngram(pd_data['text_left'].values, params['ngram'])
+        ngram_right_list = trans_ngram(pd_data['text_right'].values, params['ngram'])
         data = {'id_left': pd.Series(id_left_list),
                 'text_left': pd.Series(text_left_list),
                 'ngram_left': pd.Series(ngram_left_list),
                 'length_left': pd.Series(length_left_list),
                 'id_right': pd.Series(id_right_list),
-                'text_right': pd.Series(text_left_list),
+                'text_right': pd.Series(text_right_list),
                 'ngram_right': pd.Series(ngram_right_list),
                 'length_right': pd.Series(length_right_list),
                 'label': pd.Series(label_list)}
@@ -90,7 +115,7 @@ def trans_pd(file_name, arc):
                 'text_left': pd.Series(text_left_list),
                 'length_left': pd.Series(length_left_list),
                 'id_right': pd.Series(id_right_list),
-                'text_right': pd.Series(text_left_list),
+                'text_right': pd.Series(text_right_list),
                 'length_right': pd.Series(length_right_list),
                 'label': pd.Series(label_list)}
 
@@ -99,9 +124,9 @@ def trans_pd(file_name, arc):
 
 def arc_train_preprocess(args, arc, params):
     # Prepare input data:
-    train_data = trans_pd(args.data_dir + 'train_df.csv', arc)
-    valid_data = trans_pd(args.data_dir + 'valid_df.csv', arc)
-    test_data = trans_pd(args.data_dir + 'test_df.csv', arc)
+    train_data = trans_pd(args.data_dir + 'train_df.csv', arc, params)
+    valid_data = trans_pd(args.data_dir + 'valid_df.csv', arc, params)
+    test_data = trans_pd(args.data_dir + 'test_df.csv', arc, params)
 
     train_processed = mz.pack(train_data)
     valid_processed = mz.pack(valid_data)
@@ -125,7 +150,7 @@ def arc_train_preprocess(args, arc, params):
         batch_size=32
     )
     if args.ind:
-        ind_data = trans_pd(args.data_dir + 'ind_df.csv', arc)
+        ind_data = trans_pd(args.data_dir + 'ind_df.csv', arc, params)
         ind_processed = mz.pack(ind_data)
         ind_set = mz.dataloader.Dataset(
             data_pack=ind_processed,

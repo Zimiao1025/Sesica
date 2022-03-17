@@ -39,11 +39,9 @@ def dssm_train(train_set, valid_set, test_set, model_path, ind_set=None, params=
 
     model = mz.models.DSSM()
     model.params['task'] = ranking_task
-    model.params['vocab_size'] = params['dssm_emb_in']
-    model.params['mlp_num_layers'] = 3
-    model.params['mlp_num_units'] = 300
-    model.params['mlp_num_fan_out'] = 128
-    model.params['mlp_activation_func'] = 'relu'
+    model.params['vocab_size'] = params['vocab_size']
+    model.params['mlp_num_layers'] = params['dssm_layers']
+    model.params['mlp_num_units'] = params['dssm_units']
     model.build()
     print(model)
     print('Trainable params: ', sum(p.numel() for p in model.parameters() if p.requires_grad))

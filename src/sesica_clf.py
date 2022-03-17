@@ -57,8 +57,8 @@ def clf_bmk(args):
         # np.save(args.data_dir + 'bmk_y.npy', bmk_y)
 
         # under-sampling for a balanced training set
-        sp_associations = util_ctrl.sp_ctrl(associations)
-        train_x, train_y = data_clf_train(train_index, sp_associations, a_encodings, b_encodings)
+        # sp_associations = util_ctrl.sp_ctrl(associations)
+        train_x, train_y = data_clf_train(train_index, associations, a_encodings, b_encodings)
         # validation set (Question: associations or sp_associations?)
         valid_x, valid_y, valid_g = data_clf_valid(valid_index, associations, a_encodings, b_encodings)
         # testing set
@@ -130,7 +130,7 @@ if __name__ == '__main__':
                                                                  'ndcg@50', 'roc@50'], default=['aupr'],
                        help="The metrics for parameters selection")
     parse.add_argument('-top_n', type=int, nargs='*', default=[1],
-                       help="Select the n best models for specific metric of different methods.")
+                       help="Select the n best models for specific metric of distribution based methods.")
     # parameters for svm
     parse.add_argument('-svm_c', type=int, default=[0], nargs='*', help="Regularization parameter of 'RSVM'.")
     parse.add_argument('-svm_g', type=int, default=[1], nargs='*', help="Kernel coefficient of 'RSVM'.")

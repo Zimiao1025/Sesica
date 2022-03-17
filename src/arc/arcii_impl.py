@@ -1,11 +1,10 @@
-import numpy as np
-import torch
 import matchzoo as mz
+import torch
 
 
 def arcii_train(train_set, valid_set, test_set, model_path, ind_set=None, params=None):
     # Make use of MatchZoo customized loss functions and evaluation metrics to define a task:
-    ranking_task = mz.tasks.Ranking(losses=mz.losses.RankCrossEntropyLoss(num_neg=params['arcii_neg']))
+    ranking_task = mz.tasks.Ranking(losses=mz.losses.RankCrossEntropyLoss(num_neg=params['num_neg']['arcii']))
     ranking_task.metrics = [
         mz.metrics.NormalizedDiscountedCumulativeGain(k=3),
         mz.metrics.NormalizedDiscountedCumulativeGain(k=5),

@@ -104,7 +104,7 @@ if __name__ == '__main__':
                        help="The input files for positive and negative associations of independent datasets.")
     parse.add_argument('-category', type=str, choices=['DNA', 'RNA', 'Protein'], required=True,
                        help="The category of input sequences.")
-    parse.add_argument('-word_size', type=int, default=5, help="The kmer word size for making vocabulary.")
+    parse.add_argument('-word_size', type=int, default=4, help="The kmer word size for making vocabulary.")
     parse.add_argument('-fixed_len', type=int, default=500,
                        help="The length of sequence will be fixed via cutting or padding.")
     parse.add_argument('-arc', type=str, nargs='*',
@@ -139,7 +139,7 @@ if __name__ == '__main__':
                        help="The metrics for parameters selection")
     # parameters for arci
     parse.add_argument('-arci_neg', type=int, default=4, help="Number of negative samples for ranking of arci model.")
-    parse.add_argument('-arci_epoch', type=int, default=10, help="Number of epochs for training of arci model.")
+    parse.add_argument('-arci_epoch', type=int, default=5, help="Number of epochs for training of arci model.")
     parse.add_argument('-arci_dropout', type=float, default=0.5, help="Dropout rate for training of arci model.")
     parse.add_argument('-arci_lr', type=float, default=3e-4, help="Learning rate for optimizer of arci model.")
     parse.add_argument('-arci_emb', type=int, default=128, help="Embedding output dimension of arci model.")
@@ -147,10 +147,36 @@ if __name__ == '__main__':
     parse.add_argument('-arci_units', type=int, default=64, help="Number of mlp units for arci model.")
     # parameters for arcii
     parse.add_argument('-arcii_neg', type=int, default=4, help="Number of negative samples for ranking of arcii model.")
-    parse.add_argument('-arcii_epoch', type=int, default=1, help="Number of epochs for training of arcii model.")
+    parse.add_argument('-arcii_epoch', type=int, default=5, help="Number of epochs for training of arcii model.")
     parse.add_argument('-arcii_dropout', type=float, default=0.5, help="Dropout rate for training of arcii model.")
     parse.add_argument('-arcii_lr', type=float, default=3e-4, help="Learning rate for optimizer of arcii model.")
     parse.add_argument('-arcii_emb', type=int, default=128, help="Embedding output dimension of arcii model.")
+    # parameters for dssm
+    parse.add_argument('-dssm_neg', type=int, default=4, help="Number of negative samples for ranking of dssm model.")
+    parse.add_argument('-dssm_ngram', type=int, default=3, help="The N of n-gram model for dssm model.")
+    parse.add_argument('-dssm_epoch', type=int, default=5, help="Number of epochs for training of dssm model.")
+    parse.add_argument('-dssm_dropout', type=float, default=0.5, help="Dropout rate for training of dssm model.")
+    parse.add_argument('-dssm_lr', type=float, default=3e-4, help="Learning rate for optimizer of dssm model.")
+    # parse.add_argument('-dssm_emb', type=int, default=128, help="Embedding output dimension of dssm model.")
+    parse.add_argument('-dssm_layers', type=int, default=3, help="Number of mlp layers for dssm model.")
+    parse.add_argument('-dssm_units', type=int, default=300, help="Number of mlp units for dssm model.")
+    # parameters for cdssm
+    parse.add_argument('-cdssm_neg', type=int, default=4, help="Number of negative samples for ranking of cdssm model.")
+    parse.add_argument('-cdssm_ngram', type=int, default=3, help="The N of n-gram model for cdssm model.")
+    parse.add_argument('-cdssm_epoch', type=int, default=5, help="Number of epochs for training of cdssm model.")
+    parse.add_argument('-cdssm_dropout', type=float, default=0.5, help="Dropout rate for training of cdssm model.")
+    parse.add_argument('-cdssm_lr', type=float, default=3e-4, help="Learning rate for optimizer of cdssm model.")
+    # parse.add_argument('-cdssm_emb', type=int, default=128, help="Embedding output dimension of cdssm model.")
+    parse.add_argument('-cdssm_layers', type=int, default=1, help="Number of mlp layers for cdssm model.")
+    parse.add_argument('-cdssm_units', type=int, default=64, help="Number of mlp units for cdssm model.")
+    # parameters for arci
+    parse.add_argument('-drmm_neg', type=int, default=4, help="Number of negative samples for ranking of drmm model.")
+    parse.add_argument('-drmm_epoch', type=int, default=5, help="Number of epochs for training of drmm model.")
+    parse.add_argument('-drmm_dropout', type=float, default=0.5, help="Dropout rate for training of drmm model.")
+    parse.add_argument('-drmm_lr', type=float, default=3e-4, help="Learning rate for optimizer of drmm model.")
+    parse.add_argument('-drmm_emb', type=int, default=128, help="Embedding output dimension of drmm model.")
+    parse.add_argument('-drmm_layers', type=int, default=1, help="Number of mlp layers for drmm model.")
+    parse.add_argument('-drmm_units', type=int, default=32, help="Number of mlp units for drmm model.")
 
     argv = parse.parse_args()
     main(argv)
