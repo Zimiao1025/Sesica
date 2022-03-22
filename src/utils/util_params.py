@@ -141,7 +141,7 @@ def lgb_params_check(tree, num_leaves, gs_mode=0):
 
 def clf_params_control(clf, args, params):
     if clf == 'svm':
-        params['svm_c'], params['svm_g'] = svm_params_check(args.rsvm_c, args.rsvm_c, args.gs_mode)
+        params['svm_c'], params['svm_g'] = svm_params_check(args.svm_c, args.svm_c, args.gs_mode)
     elif clf == 'rf':
         params['rf_t'] = rt_params_check(args.rf_t, args.gs_mode)
     elif clf == 'ert':
@@ -177,6 +177,47 @@ def arc_params_control(arc, args, params):
             params['arci_emb_in'] = 21 ** args.word_size
         else:
             params['arci_emb_in'] = 5 ** args.word_size
+    elif arc == 'arcii':
+        params['num_neg']['arcii'] = args.arcii_neg
+        params['arcii_epoch'] = args.arcii_epoch
+        params['arcii_dropout'] = args.arcii_dropout
+        params['arcii_lr'] = args.arcii_lr
+        params['arcii_emb_out'] = args.arcii_emb
+        if args.category == 'Protein':
+            params['arcii_emb_in'] = 21 ** args.word_size
+        else:
+            params['arcii_emb_in'] = 5 ** args.word_size
+    elif arc == 'dssm':
+        params['num_neg']['dssm'] = args.dssm_neg
+        params['ngram'] = args.dssm_ngram
+        params['dssm_epoch'] = args.dssm_epoch
+        params['dssm_dropout'] = args.dssm_dropout
+        params['dssm_lr'] = args.dssm_lr
+        params['dssm_layers'] = args.dssm_layers
+        params['dssm_units'] = args.dssm_units
+        # params['dssm_emb_out'] = args.dssm_emb
+        params['vocab_size'] = args.fixed_len
+    elif arc == 'cdssm':
+        params['num_neg']['cdssm'] = args.cdssm_neg
+        params['ngram'] = args.cdssm_ngram
+        params['cdssm_epoch'] = args.cdssm_epoch
+        params['cdssm_dropout'] = args.cdssm_dropout
+        params['cdssm_lr'] = args.cdssm_lr
+        params['cdssm_layers'] = args.cdssm_layers
+        params['cdssm_units'] = args.cdssm_units
+        # params['cdssm_emb_out'] = args.cdssm_emb
+        params['vocab_size'] = args.fixed_len
+    elif arc == 'drmm':
+        params['num_neg']['drmm'] = args.drmm_neg
+        params['drmm_epoch'] = args.drmm_epoch
+        params['drmm_lr'] = args.drmm_lr
+        params['drmm_layers'] = args.drmm_layers
+        params['drmm_units'] = args.drmm_units
+        params['drmm_emb_out'] = args.drmm_emb
+        if args.category == 'Protein':
+            params['drmm_emb_in'] = 21 ** args.word_size
+        else:
+            params['drmm_emb_in'] = 5 ** args.word_size
     return params
 
 

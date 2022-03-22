@@ -12,10 +12,10 @@ def load_prob(args, ind, params):
         top_n = params['top_n'][clf]
         for n in range(1, top_n + 1):
             plot_data[clf + '_' + str(n)] = clf_prob['top_' + str(n)]
-    if args.integrate != 'none':
-        if ind or args.integrate not in ['lr', 'ltr']:
-            int_file_path = args.int_path + 'prob.npy' if not ind else args.int_path + 'ind_prob.npy'
-            plot_data[args.integrate] = list(np.load(int_file_path))
+    # if args.integrate != 'none':
+    #     if ind or args.integrate not in ['lr', 'ltr']:
+    #         int_file_path = args.int_path + 'prob.npy' if not ind else args.int_path + 'ind_prob.npy'
+    #         plot_data[args.integrate] = list(np.load(int_file_path))
 
     return plot_data
 
@@ -28,10 +28,10 @@ def load_results(args, ind, plot_metric, params):
             file_name = 'top_' + str(n) + '_eval_results.csv' if not ind else 'top_' + str(n) + '_eval_results_ind.csv'
             eval_data = pd.read_csv(args.ssc_path[clf] + file_name, dtype=np.float).to_dict('list')[plot_metric]
             results[clf + '_' + str(n)] = eval_data
-    if args.integrate != 'none':
-        if ind or args.integrate not in ['lr', 'ltr']:
-            int_file_path = args.int_path + 'eval_results.csv' if not ind else args.int_path + 'eval_results_ind.csv'
-            results[args.integrate] = pd.read_csv(int_file_path, dtype=np.float).to_dict('list')[plot_metric]
+    # if args.integrate != 'none':
+    #     if ind or args.integrate not in ['lr', 'ltr']:
+    #         int_file_path = args.int_path + 'eval_results.csv' if not ind else args.int_path + 'eval_results_ind.csv'
+    #         results[args.integrate] = pd.read_csv(int_file_path, dtype=np.float).to_dict('list')[plot_metric]
 
     return results
 
@@ -44,10 +44,10 @@ def load_metric(args, ind, plot_metric, params):
             file_name = 'top_' + str(n) + '_eval_results.csv' if not ind else 'top_' + str(n) + '_eval_results_ind.csv'
             eval_data = pd.read_csv(args.ssc_path[clf] + file_name, dtype=np.float).to_dict('list')[plot_metric]
             results[clf + '_' + str(n)] = np.mean(eval_data)
-    if args.integrate != 'none':
-        if ind or args.integrate not in ['lr', 'ltr']:
-            int_file_path = args.int_path + 'eval_results.csv' if not ind else args.int_path + 'eval_results_ind.csv'
-            results[args.integrate] = np.mean(pd.read_csv(int_file_path, dtype=np.float).to_dict('list')[plot_metric])
+    # if args.integrate != 'none':
+    #     if ind or args.integrate not in ['lr', 'ltr']:
+    #         int_file_path = args.int_path + 'eval_results.csv' if not ind else args.int_path + 'eval_results_ind.csv'
+    #         results[args.integrate] = np.mean(pd.read_csv(int_file_path, dtype=np.float).to_dict('list')[plot_metric])
 
     return results
 
@@ -60,11 +60,11 @@ def load_eval(args, polar_clf, ind, params):
             file_name = 'top_' + str(n) + '_eval_results.csv' if not ind else 'top_' + str(n) + '_eval_results_ind.csv'
             eval_data = pd.read_csv(args.ssc_path[clf] + file_name, dtype=np.float).mean().tolist()
             results[clf + '_' + str(n)] = eval_data[1:]
-    if args.integrate != 'none':
-        if ind or args.integrate not in ['lr', 'ltr']:
-            int_file_path = args.int_path + 'eval_results.csv' if not ind else args.int_path + 'eval_results_ind.csv'
-            int_eval_data = pd.read_csv(int_file_path, dtype=np.float).mean().tolist()
-            results[args.integrate] = int_eval_data[1:]
+    # if args.rank != 'none':
+    #     if ind or args.rank not in ['lr', 'ltr']:
+    #         int_file_path = args.int_path + 'eval_results.csv' if not ind else args.int_path + 'eval_results_ind.csv'
+    #         int_eval_data = pd.read_csv(int_file_path, dtype=np.float).mean().tolist()
+    #         results[args.integrate] = int_eval_data[1:]
 
     return results
 
@@ -132,7 +132,7 @@ def plot_fig(args, ind, params):
             fig_path = args.fig_dir + 'polar.png' if not ind else args.fig_dir + 'ind_polar.png'
             plot_bin.polar_fig(polar_method, list(result_dict.values()), args.metrics, fig_path)
         elif pl == '3d':
-            args.integrate = 'none'
+            args.rank = 'none'
             prob_dict = load_prob(args, ind, params)
             prob_arr = np.array(list(prob_dict.values()), dtype=np.float).transpose()
             true_x = np.load(args.data_dir + 'valid_x.npy') if not ind else np.load(args.data_dir + 'ind_x.npy')
@@ -150,22 +150,22 @@ def plot_fig(args, ind, params):
             fig_path = args.fig_dir + 'dist.png' if not ind else args.fig_dir + 'dist_ind.png'
             plot_bin.dist_fig(new_prob, dist_method, fig_path)
         elif pl == 'hp':
-            args.integrate = 'none'
+            args.rank = 'none'
             prob_dict = load_prob(args, ind, params)
             fig_path = args.fig_dir + 'hp.png' if not ind else args.fig_dir + 'hp_ind.png'
             plot_bin.hp_fig(pd.DataFrame(prob_dict), fig_path)
         elif pl == 'pie':
-            if args.integrate in ['ga', 'de']:
+            if args.rank in ['ga', 'de']:
                 fig_path = args.fig_dir + '_pie.png' if not ind else args.fig_dir + '_pie_ind.png'
                 weight = np.load(args.int_path + 'opt_weight.npy')
                 plot_int.pie_fig(weight, args.clf, fig_path)
             else:
-                print('If you want to plot pie fig, the integrate method ga or de should be selected!\n')
+                print('If you want to plot pie fig, the rank method ga or de should be selected!\n')
         elif pl == 'bar':
-            if args.integrate == 'ltr':
-                args.integrate = 'none'
+            if args.rank == 'ltr':
+                args.rank = 'none'
                 prob_dict = load_prob(args, ind, params)
                 fig_path = args.fig_dir + '_bar.png' if not ind else args.fig_dir + '_bar_ind.png'
                 plot_int.bar_fig(args.int_path + 'ltr_model.pkl', list(prob_dict.keys()), fig_path)
             else:
-                print('If you want to plot bar fig, the integrate method ltr should be selected!\n')
+                print('If you want to plot bar fig, the rank method ltr should be selected!\n')

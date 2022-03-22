@@ -94,7 +94,8 @@ if __name__ == '__main__':
 
     parse = argparse.ArgumentParser(prog='Sesica', description="Step into analysis, please select parameters ")
 
-    # parameters for
+    # parameters for clf
+    parse.add_argument('-base_dir', nargs='*', required=True, help="The path to store result.")
     parse.add_argument('-bmk_vec', nargs='*', required=True, help="The feature vector files of benchmark datasets.")
     parse.add_argument('-bmk_label', nargs='*', required=True,
                        help="The input files for positive and negative associations of benchmark datasets.")

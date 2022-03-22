@@ -5,7 +5,7 @@ from utils import util_ctrl
 def main(args):
     print("\n******************************** RANK ********************************\n")
     args = util_ctrl.rank_path_ctrl(args)
-    params = util_ctrl.params_base(args)
+    params = util_ctrl.params_rank(args)
     int_or_rank(args, params)
 
 
@@ -14,12 +14,18 @@ if __name__ == '__main__':
 
     parse = argparse.ArgumentParser(prog='Sesica', description="Step into analysis, please select parameters ")
 
-    # parameters for
+    # parameters for rank
+    parse.add_argument('-base_dir', nargs='*', required=True, help="The path to store result.")
     parse.add_argument('-ind', choices=[True, False], default=False,
                        help="The input files for positive and negative associations.")
-    parse.add_argument('-method', type=str, nargs='*',
+    parse.add_argument('-clf', type=str, nargs='*',
                        choices=['svm', 'rf', 'ert', 'knn', 'mnb', 'gbdt', 'dart', 'goss', 'mlp', 'none'],
-                       default='none',)
+                       default='none')
+    parse.add_argument('-arc', type=str, nargs='*',
+                       choices=['arci', 'arcii', 'dssm', 'cdssm', 'drmm', 'drmmtks', 'match_lstm', 'duet', 'knrm',
+                                'conv_knrm', 'esim', 'bimpm', 'match_pyramid', 'match_srnn', 'anmm', 'mv_lstm', 'diin',
+                                'hbmp', 'none'],
+                       default='none')
     # parameters for integration
     parse.add_argument('-rank', type=str, choices=['ltr', 'none'], default='none',
                        help="Rank by:\n"

@@ -94,7 +94,8 @@ if __name__ == '__main__':
 
     parse = argparse.ArgumentParser(prog='Sesica', description="Step into analysis, please select parameters ")
 
-    # parameters for input
+    # parameters for arc
+    parse.add_argument('-base_dir', nargs='*', required=True, help="The path to store result.")
     parse.add_argument('-bmk_fasta', required=True, help="The input sequence files in fasta format of benchmark datasets.")
     parse.add_argument('-bmk_label', nargs='*', required=True,
                        help="The input files for positive and negative associations of benchmark datasets.")
@@ -169,7 +170,13 @@ if __name__ == '__main__':
     # parse.add_argument('-cdssm_emb', type=int, default=128, help="Embedding output dimension of cdssm model.")
     parse.add_argument('-cdssm_layers', type=int, default=1, help="Number of mlp layers for cdssm model.")
     parse.add_argument('-cdssm_units', type=int, default=64, help="Number of mlp units for cdssm model.")
-    # parameters for arci
+    # parameters for mv_lstm
+    parse.add_argument('-mv_lstm_neg', type=int, default=4,
+                       help="Number of negative samples for ranking of mv_lstm model.")
+    parse.add_argument('-mv_lstm_epoch', type=int, default=5, help="Number of epochs for training of mv_lstm model.")
+    parse.add_argument('-mv_lstm_dropout', type=float, default=0.5, help="Dropout rate for training of mv_lstm model.")
+    parse.add_argument('-mv_lstm_lr', type=float, default=3e-4, help="Learning rate for optimizer of mv_lstm model.")
+    # parameters for drmm
     parse.add_argument('-drmm_neg', type=int, default=4, help="Number of negative samples for ranking of drmm model.")
     parse.add_argument('-drmm_epoch', type=int, default=5, help="Number of epochs for training of drmm model.")
     parse.add_argument('-drmm_dropout', type=float, default=0.5, help="Dropout rate for training of drmm model.")
@@ -177,6 +184,66 @@ if __name__ == '__main__':
     parse.add_argument('-drmm_emb', type=int, default=128, help="Embedding output dimension of drmm model.")
     parse.add_argument('-drmm_layers', type=int, default=1, help="Number of mlp layers for drmm model.")
     parse.add_argument('-drmm_units', type=int, default=32, help="Number of mlp units for drmm model.")
+    # parameters for drmmtks
+    parse.add_argument('-drmmtks_neg', type=int, default=4, help="Number of negative samples for ranking of drmmtks model.")
+    parse.add_argument('-drmmtks_epoch', type=int, default=5, help="Number of epochs for training of drmmtks model.")
+    parse.add_argument('-drmmtks_dropout', type=float, default=0.5, help="Dropout rate for training of drmmtks model.")
+    parse.add_argument('-drmmtks_lr', type=float, default=3e-4, help="Learning rate for optimizer of drmmtks model.")
+    # parameters for match_lstm
+    parse.add_argument('-match_lstm_neg', type=int, default=4, help="Number of negative samples for ranking of match_lstm model.")
+    parse.add_argument('-match_lstm_epoch', type=int, default=5, help="Number of epochs for training of match_lstm model.")
+    parse.add_argument('-match_lstm_dropout', type=float, default=0.5, help="Dropout rate for training of match_lstm model.")
+    parse.add_argument('-match_lstm_lr', type=float, default=3e-4, help="Learning rate for optimizer of match_lstm model.")
+    # parameters for duet
+    parse.add_argument('-duet_neg', type=int, default=4, help="Number of negative samples for ranking of duet model.")
+    parse.add_argument('-duet_epoch', type=int, default=5, help="Number of epochs for training of duet model.")
+    parse.add_argument('-duet_dropout', type=float, default=0.5, help="Dropout rate for training of duet model.")
+    parse.add_argument('-duet_lr', type=float, default=3e-4, help="Learning rate for optimizer of duet model.")
+    # parameters for knrm
+    parse.add_argument('-knrm_neg', type=int, default=4, help="Number of negative samples for ranking of knrm model.")
+    parse.add_argument('-knrm_epoch', type=int, default=5, help="Number of epochs for training of knrm model.")
+    parse.add_argument('-knrm_dropout', type=float, default=0.5, help="Dropout rate for training of knrm model.")
+    parse.add_argument('-knrm_lr', type=float, default=3e-4, help="Learning rate for optimizer of knrm model.")
+    # parameters for conv_knrm
+    parse.add_argument('-conv_knrm_neg', type=int, default=4, help="Number of negative samples for ranking of conv_knrm model.")
+    parse.add_argument('-conv_knrm_epoch', type=int, default=5, help="Number of epochs for training of conv_knrm model.")
+    parse.add_argument('-conv_knrm_dropout', type=float, default=0.5, help="Dropout rate for training of conv_knrm model.")
+    parse.add_argument('-conv_knrm_lr', type=float, default=3e-4, help="Learning rate for optimizer of conv_knrm model.")
+    # parameters for esim
+    parse.add_argument('-esim_neg', type=int, default=4, help="Number of negative samples for ranking of esim model.")
+    parse.add_argument('-esim_epoch', type=int, default=5, help="Number of epochs for training of esim model.")
+    parse.add_argument('-esim_dropout', type=float, default=0.5, help="Dropout rate for training of esim model.")
+    parse.add_argument('-esim_lr', type=float, default=3e-4, help="Learning rate for optimizer of esim model.")
+    # parameters for bimpm
+    parse.add_argument('-bimpm_neg', type=int, default=4, help="Number of negative samples for ranking of bimpm model.")
+    parse.add_argument('-bimpm_epoch', type=int, default=5, help="Number of epochs for training of bimpm model.")
+    parse.add_argument('-bimpm_dropout', type=float, default=0.5, help="Dropout rate for training of bimpm model.")
+    parse.add_argument('-bimpm_lr', type=float, default=3e-4, help="Learning rate for optimizer of bimpm model.")
+    # parameters for match_pyramid
+    parse.add_argument('-match_pyramid_neg', type=int, default=4, help="Number of negative samples for ranking of match_pyramid model.")
+    parse.add_argument('-match_pyramid_epoch', type=int, default=5, help="Number of epochs for training of match_pyramid model.")
+    parse.add_argument('-match_pyramid_dropout', type=float, default=0.5, help="Dropout rate for training of match_pyramid model.")
+    parse.add_argument('-match_pyramid_lr', type=float, default=3e-4, help="Learning rate for optimizer of match_pyramid model.")
+    # parameters for match_srnn
+    parse.add_argument('-match_srnn_neg', type=int, default=4, help="Number of negative samples for ranking of match_srnn model.")
+    parse.add_argument('-match_srnn_epoch', type=int, default=5, help="Number of epochs for training of match_srnn model.")
+    parse.add_argument('-match_srnn_dropout', type=float, default=0.5, help="Dropout rate for training of match_srnn model.")
+    parse.add_argument('-match_srnn_lr', type=float, default=3e-4, help="Learning rate for optimizer of match_srnn model.")
+    # parameters for anmm
+    parse.add_argument('-anmm_neg', type=int, default=4, help="Number of negative samples for ranking of anmm model.")
+    parse.add_argument('-anmm_epoch', type=int, default=5, help="Number of epochs for training of anmm model.")
+    parse.add_argument('-anmm_dropout', type=float, default=0.5, help="Dropout rate for training of anmm model.")
+    parse.add_argument('-anmm_lr', type=float, default=3e-4, help="Learning rate for optimizer of anmm model.")
+    # parameters for diin
+    parse.add_argument('-diin_neg', type=int, default=4, help="Number of negative samples for ranking of diin model.")
+    parse.add_argument('-diin_epoch', type=int, default=5, help="Number of epochs for training of diin model.")
+    parse.add_argument('-diin_dropout', type=float, default=0.5, help="Dropout rate for training of diin model.")
+    parse.add_argument('-diin_lr', type=float, default=3e-4, help="Learning rate for optimizer of diin model.")
+    # parameters for hbmp
+    parse.add_argument('-hbmp_neg', type=int, default=4, help="Number of negative samples for ranking of hbmp model.")
+    parse.add_argument('-hbmp_epoch', type=int, default=5, help="Number of epochs for training of hbmp model.")
+    parse.add_argument('-hbmp_dropout', type=float, default=0.5, help="Dropout rate for training of hbmp model.")
+    parse.add_argument('-hbmp_lr', type=float, default=3e-4, help="Learning rate for optimizer of hbmp model.")
 
     argv = parse.parse_args()
     main(argv)
