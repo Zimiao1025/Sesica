@@ -1,6 +1,6 @@
 /.vscode
 /.idea
-/example
+/data
 *.pyc
 *.csv
 *.pt

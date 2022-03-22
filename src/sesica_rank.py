@@ -15,7 +15,7 @@ if __name__ == '__main__':
     parse = argparse.ArgumentParser(prog='Sesica', description="Step into analysis, please select parameters ")
 
     # parameters for rank
-    parse.add_argument('-base_dir', nargs='*', required=True, help="The path to store result.")
+    parse.add_argument('-base_dir', required=True, help="The relative path or absolute path to store result.")
     parse.add_argument('-ind', choices=[True, False], default=False,
                        help="The input files for positive and negative associations.")
     parse.add_argument('-clf', type=str, nargs='*',
