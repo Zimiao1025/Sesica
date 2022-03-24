@@ -55,12 +55,28 @@ def rank_path_ctrl(args):
     # args.base_dir = os.path.dirname(os.getcwd()) + '/'
     args.base_dir = os.path.abspath(args.base_dir) + '/'
     args.res_dir = args.base_dir + 'result/'
+    args.data_dir = args.res_dir + 'clf_data/' if args.clf != 'none' else args.res_dir + 'arc_data/'
     # create directory for ranking
-    if args.rank == 'none':
-        if len(args.clf) >= 2:
-            args.no_int_path = path_check(args.res_dir + 'no_int/')
+    args.ssc_path = {}
+    if args.clf != 'none':
+        for clf in args.clf:
+            args.ssc_path[clf] = args.res_dir + clf + '/'
+    if args.arc != 'none':
+        for arc in args.arc:
+            args.ssc_path[arc] = args.res_dir + arc + '/'
+
+    if args.rank == 'ltr':
+        if len(args.clf) + len(args.arc) >= 2:
+            args.int_path = path_check(args.res_dir + 'ltr/')
+        else:
+            print('The learning-to-rank need no less than 2 base methods.')
+            return False
     else:
-        args.int_path = path_check(args.res_dir + args.rank + '_int/')
+        if len(args.clf) + len(args.arc) >= 2:
+            args.no_int_path = path_check(args.res_dir + 'no_ltr/')
+        else:
+            print('Only one method can not compare!')
+            return False
     return args
 
 
@@ -71,16 +87,16 @@ def plot_path_ctrl(args):
     # args.base_dir = os.path.dirname(os.getcwd()) + '/'
     args.base_dir = os.path.abspath(args.base_dir) + '/'
     args.res_dir = args.base_dir + 'result/'
-    args.data_dir = path_check(args.res_dir + 'clf_data/')
+    args.data_dir = args.res_dir + 'clf_data/' if args.clf != 'none' else args.res_dir + 'arc_data/'
     args.res_dir = args.base_dir + 'result/'
     args.ssc_path = {}
     if args.clf != 'none':
         # create directory for scale model
         for clf in args.clf:
-            args.ssc_path[clf] = path_check(args.res_dir + clf + '/')
+            args.ssc_path[clf] = args.res_dir + clf + '/'
     if args.arc != 'none':
         for arc in args.arc:
-            args.ssc_path[arc] = path_check(args.res_dir + arc + '/')
+            args.ssc_path[arc] = args.res_dir + arc + '/'
     # create directory for plotting
     if args.plot != 'none':
         args.fig_dir = path_check(args.res_dir + 'plot/')
@@ -152,8 +168,7 @@ def params_arc(args):
 
 
 def params_rank(args):
-    params = {'scale': scale_ctrl(args.clf, args.scale), 'top_n': top_n_ctrl(args.clf, args.top_n),
-              'metrics': args.metrics, 'clf_param_keys': make_clf_pk()}
+    params = {'top_n': top_n_ctrl(args.clf, args.top_n), 'metrics': args.metrics}
     return params
 
 

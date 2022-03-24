@@ -275,3 +275,4 @@ def ltr_params_check(max_depth, n_estimators, num_leaves, gs_mode=0):
 def rank_params_control(args, params):
     params['ltr_m'], params['ltr_t'], params['ltr_n'] = ltr_params_check(args.ltr_m, args.ltr_t, args.ltr_n,
                                                                              args.gs_mode)
+    return params

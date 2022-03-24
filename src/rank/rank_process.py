@@ -13,12 +13,14 @@ def rank_out(args):
     opt_val = 0.0
     for clf in args.clf:
         metric_df = pd.read_csv(args.ssc_path[clf] + 'top_1_eval_results.csv', dtype=np.float)
-        metric_list = metric_df.mean().tolist()
+        metric_list = metric_df.mean().tolist()[1:]
         if opt_val <= metric_list[0]:
             opt_list = metric_list
             opt_val = metric_list[0]
-
-    metric_data = {'metric': list(args.metric.keys()), 'val': opt_list}
+    # print(list(args.metrics))
+    # print(opt_list)
+    # exit()
+    metric_data = {'metric': list(args.metrics), 'val': opt_list}
     metric_pd = pd.DataFrame(metric_data)
     metric_pd.to_csv(args.no_int_path + 'final_result.csv')
 
@@ -28,12 +30,12 @@ def rank_out_ind(args):
     opt_val = 0.0
     for clf in args.clf:
         metric_df = pd.read_csv(args.ssc_path[clf] + 'top_1_eval_results_ind.csv', dtype=np.float)
-        metric_list = metric_df.mean().tolist()
+        metric_list = metric_df.mean().tolist()[1:]
         if opt_val <= metric_list[0]:
             opt_list = metric_list
             opt_val = metric_list[0]
 
-    metric_data = {'metric': list(args.metric.keys()), 'val': opt_list}
+    metric_data = {'metric': list(args.metrics), 'val': opt_list}
     metric_pd = pd.DataFrame(metric_data)
     metric_pd.to_csv(args.no_int_path + 'final_result_ind.csv')
 
@@ -60,10 +62,12 @@ def int_train(args, params):
     valid_g = np.load(args.data_dir + 'test_g.npy')
 
     print('Start integration......\n')
-    int_method = args.integrate
+    int_method = args.rank
 
     if int_method == 'ltr':
         params = util_params.rank_params_control(args, params)
+        # print(params)
+        # exit()
         ltr_train(train_x, train_y, train_g, valid_x, valid_y, valid_g, args.int_path, params)
 
 
@@ -90,14 +94,14 @@ def int_predict(args):
 
 
 def int_or_rank(args, params):
-    if args.integrate == 'none':
+    if args.rank == 'none':
         rank_out(args)
     else:
         int_train(args, params)
 
 
 def int_or_rank_ind(args):
-    if args.integrate == 'none':
+    if args.rank == 'none':
         rank_out_ind(args)
     else:
         int_predict(args)

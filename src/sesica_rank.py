@@ -18,20 +18,29 @@ if __name__ == '__main__':
     parse.add_argument('-base_dir', required=True, help="The relative path or absolute path to store result.")
     parse.add_argument('-ind', choices=[True, False], default=False,
                        help="The input files for positive and negative associations.")
-    parse.add_argument('-clf', type=str, nargs='*',
-                       choices=['svm', 'rf', 'ert', 'knn', 'mnb', 'gbdt', 'dart', 'goss', 'mlp', 'none'],
-                       default='none')
-    parse.add_argument('-arc', type=str, nargs='*',
-                       choices=['arci', 'arcii', 'dssm', 'cdssm', 'drmm', 'drmmtks', 'match_lstm', 'duet', 'knrm',
-                                'conv_knrm', 'esim', 'bimpm', 'match_pyramid', 'match_srnn', 'anmm', 'mv_lstm', 'diin',
-                                'hbmp', 'none'],
-                       default='none')
     # parameters for integration
     parse.add_argument('-rank', type=str, choices=['ltr', 'none'], default='none',
                        help="Rank by:\n"
                             " 'none' --- Without integration, the output is sorted directly according to the metric;\n"
                             " 'ltr' --- Learning to rank with LambdaRank.\n"
                        )
+    parse.add_argument('-clf', type=str, nargs='*',
+                       choices=['svm', 'rf', 'ert', 'knn', 'mnb', 'gbdt', 'dart', 'goss', 'mlp', 'none'],
+                       default='none')
+    parse.add_argument('-top_n', type=int, nargs='*', default=[1],
+                       help="Select the n best models for specific metric of distribution based methods.")
+    parse.add_argument('-arc', type=str, nargs='*',
+                       choices=['arci', 'arcii', 'dssm', 'cdssm', 'drmm', 'drmmtks', 'match_lstm', 'duet', 'knrm',
+                                'conv_knrm', 'esim', 'bimpm', 'match_pyramid', 'match_srnn', 'anmm', 'mv_lstm', 'diin',
+                                'hbmp', 'none'],
+                       default='none')
+    # parameters for no grid search
+    parse.add_argument('-gs_mode', type=int, choices=[0, 1, 2], default=0,
+                       help="grid = 0 for no grid search, 1 for rough grid search, 2 for meticulous grid search.")
+    parse.add_argument('-metrics', type=str, nargs='*', choices=['aupr', 'auc', 'ndcg', 'ndcg@1', 'roc@1', 'ndcg@5',
+                                                                 'roc@5', 'ndcg@10', 'roc@10', 'ndcg@20', 'roc@20',
+                                                                 'ndcg@50', 'roc@50'], default=['aupr'],
+                       help="The metrics for parameters selection")
     # parameters for ltr
     parse.add_argument('-ltr_m', type=int, default=[0], nargs='*',
                        help="Maximum tree depth for base learners, <=0 means no limit.")
