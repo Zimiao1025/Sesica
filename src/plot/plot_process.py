@@ -100,7 +100,8 @@ def prob_rus(prob_dict, label_arr, dist_method):
 
 def check_args4plot(args):
     if 'box' in args.plot:
-        args.plot_metric = args.metrics[0] if args.plot_metric == 'metric_1' else args.plot_metric
+        # args.plot_metric = args.metrics[0] if args.plot_metric == 'metric_1' else args.plot_metric
+        args.plot_metric = 'ndcg'
     return args
 
 
@@ -143,7 +144,7 @@ def plot_fig(args, ind, params):
             new_fig_path = args.fig_dir + 'new_dr_3d.png' if not ind else args.fig_dir + 'new_dr_3d_ind.png'
             plot_bin.plot_3d(new_prob, new_y, new_fig_path)
         elif pl == 'dist':
-            dist_method = ['rsvm_1', 'lsvm_1']
+            dist_method = ['svm_1', 'rf_1']
             true_y = np.load(args.data_dir + 'valid_y.npy') if not ind else np.load(args.data_dir + 'ind_y.npy')
             prob_dict = load_prob(args, ind, params)
             new_prob = prob_rus(prob_dict, true_y, dist_method)
