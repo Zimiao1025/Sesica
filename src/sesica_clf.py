@@ -40,9 +40,12 @@ def data_clf_valid(index_arr, associations, a_encodings, b_encodings):
     return np.array(vectors, dtype=float), np.array(labels, dtype=float), np.array(groups, dtype=int)
 
 
-def clf_bmk(args):
+def clf_bmk_hetero(args):
     # heterogeneous graph <-- benchmark dataset
-    a_encodings, b_encodings = util_graph.load_hetero_encodings(args.bmk_vec)
+    a_df, a_encodings = util_graph.load_vec_encodings(args.bmk_vec_a)
+    b_df, b_encodings = util_graph.load_vec_encodings(args.bmk_vec_b)
+    a_df.to_csv(args.data_dir + 'bmk_vec_a.csv')
+    b_df.to_csv(args.data_dir + 'bmk_vec_b.csv')
     pos_pairs, neg_pairs = util_graph.load_connections(args.bmk_label)
 
     # split dataset for parameter selection
@@ -80,7 +83,8 @@ def clf_bmk(args):
 def main(args):
     print("\n******************************** Analysis ********************************\n")
     args = util_ctrl.clf_path_ctrl(args)
-    clf_bmk(args)
+    if args.data_type == 'hetero':
+        clf_bmk_hetero(args)
     params = util_ctrl.params_clf(args)
     # print(params)
     clf_process.clf_train(args, params)
@@ -96,11 +100,17 @@ if __name__ == '__main__':
 
     # parameters for clf
     parse.add_argument('-base_dir', required=True, help="The relative path or absolute path to store result.")
-    parse.add_argument('-bmk_vec', nargs='*', required=True, help="The feature vector files of benchmark datasets.")
+    parse.add_argument('-data_type', required=True, choices=['hetero', 'homo'],
+                       help="Select the input heterogeneous data or homogeneous data.")
+    parse.add_argument('-bmk_vec_a', help="The feature vector files of heterogeneous benchmark datasets A.")
+    parse.add_argument('-bmk_vec_b', help="The feature vector files of heterogeneous benchmark datasets B.")
+    parse.add_argument('-bmk_vec', help="The feature vector files of homogeneous benchmark datasets.")
     parse.add_argument('-bmk_label', nargs='*', required=True,
                        help="The input files for positive and negative associations of benchmark datasets.")
     parse.add_argument('-ind', choices=[True, False], default=False, help="Input independent test dataset or not.")
-    parse.add_argument('-ind_vec', nargs='*', help="The feature vector files of independent datasets.")
+    parse.add_argument('-ind_vec_a', help="The feature vector files of heterogeneous independent datasets A.")
+    parse.add_argument('-ind_vec_b', help="The feature vector files of heterogeneous independent datasets B.")
+    parse.add_argument('-ind_vec', help="The feature vector files of homogeneous independent datasets.")
     parse.add_argument('-ind_label', nargs='*',
                        help="The input files for positive and negative associations of independent datasets.")
     parse.add_argument('-clf', type=str, nargs='*',

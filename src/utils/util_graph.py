@@ -1,17 +1,25 @@
 from collections import defaultdict
 
 import numpy as np
+import pandas as pd
 
 
-def load_homo_encodings(vec_file):
-    encodings = np.loadtxt(vec_file)
-    return encodings
+def load_vec_encodings(vec_file):
+    with open(vec_file, 'r') as f:
+        lines = f.readlines()
+        vec_dict_list = []
+        vectors = []
+        for idx, line in enumerate(lines):
+            vec_id = idx // 2
+            if line.startswith('>'):
+                vec_name = line.strip().split()[1]
+                vector = lines[idx+1].strip().split()
+                vector = list(map(float, vector))
+                vectors.append(vector)
+                tmp_dict = {'vec_id': vec_id, 'vec_name': vec_name, 'vector': vector}
+                vec_dict_list.append(tmp_dict)
 
-
-def load_hetero_encodings(vec_file):
-    a_encodings = np.loadtxt(vec_file[0])
-    b_encodings = np.loadtxt(vec_file[1])
-    return a_encodings, b_encodings
+    return pd.DataFrame(vec_dict_list), np.array(vectors, dtype=float)
 
 
 def load_connections(label_file):
