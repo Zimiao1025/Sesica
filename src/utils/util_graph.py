@@ -10,13 +10,13 @@ def load_vec_encodings(vec_file):
         vec_dict_list = []
         vectors = []
         for idx, line in enumerate(lines):
-            vec_id = idx // 2
+            # vec_id = idx // 2
             if line.startswith('>'):
                 vec_name = line.strip().split()[1]
                 vector = lines[idx+1].strip().split()
                 vector = list(map(float, vector))
                 vectors.append(vector)
-                tmp_dict = {'vec_id': vec_id, 'vec_name': vec_name, 'vector': vector}
+                tmp_dict = {'vec_name': vec_name, 'vec_value': vector}
                 vec_dict_list.append(tmp_dict)
 
     return pd.DataFrame(vec_dict_list), np.array(vectors, dtype=float)

@@ -71,7 +71,7 @@ def int_train(args, params):
         ltr_train(train_x, train_y, train_g, valid_x, valid_y, valid_g, args.int_path, params)
 
 
-def int_predict(args):
+def int_test(args):
     test_x = np.load(args.data_dir + 'ind_x.npy')
     test_y = np.load(args.data_dir + 'ind_y.npy')
     test_g = np.load(args.data_dir + 'ind_g.npy')
@@ -104,4 +104,4 @@ def int_or_rank_ind(args):
     if args.rank == 'none':
         rank_out_ind(args)
     else:
-        int_predict(args)
+        int_test(args)

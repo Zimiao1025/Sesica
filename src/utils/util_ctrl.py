@@ -2,6 +2,48 @@ import os
 import random
 
 
+def args_check(args):
+    if args.data_type == 'homo':
+        if args.bmk_vec:
+            print('Please input vector file of benchmark dataset for calculating!')
+            return False
+        if len(args.bmk_label) != 2:
+            print('Please input 2 label file of benchmark dataset for calculating!')
+            return False
+        if args.ind == 'score':
+            if args.ind_vec:
+                print('Please input vector file of independent test dataset for scoring!')
+                return False
+        if args.ind == 'test':
+            if args.ind_vec:
+                print('Please input vector file of independent test dataset for testing!')
+                return False
+            if len(args.ind_label) != 2:
+                print('Please input 2 label file of independent test dataset for calculating!')
+                return False
+    if args.data_type == 'hetero':
+        if args.bmk_vec_a:
+            print('Please input vector file of benchmark dataset A for calculating!')
+            return False
+        if args.bmk_vec_b:
+            print('Please input vector file of benchmark dataset B for calculating!')
+            return False
+        if len(args.bmk_label) != 2:
+            print('Please input 2 label file of benchmark dataset for calculating!')
+            return False
+        if args.ind == 'score':
+            if args.ind_vec_a or args.ind_vec_b:
+                print('Please input vector file of independent test dataset A or B for calculating!')
+                return False
+        if args.ind == 'test':
+            if args.ind_vec_a or args.ind_vec_b:
+                print('Please input vector file of independent test dataset A or B for calculating!')
+                return False
+            if len(args.ind_label) != 2:
+                print('Please input 2 label file of independent test dataset for calculating!')
+                return False
+
+
 def path_check(target_dir):
     if not os.path.exists(target_dir):
         try:
@@ -34,6 +76,8 @@ def clf_path_ctrl(args):
         args.clf_path = {}
         for clf in args.clf:
             args.clf_path[clf] = path_check(args.res_dir + clf + '/')
+    if args.ind == 'score':
+        args.score_dir = path_check(args.res_dir + 'score/')
     return args
 
 
@@ -149,6 +193,15 @@ def scale_ctrl(clf, scale):
     return scale_dict
 
 
+def metric_ctrl(metric):
+    all_metric = ['aupr', 'auc', 'ndcg', 'roc@1', 'ndcg@10', 'roc@10', 'ndcg@20', 'roc@20', 'ndcg@50', 'roc@50']
+    ret_metric = [metric]
+    for val in all_metric:
+        if val != metric:
+            ret_metric.append(val)
+    return ret_metric
+
+
 def make_clf_pk():
     # 不一定只是clf, 后续扩展
     return {'svm': ['svm_c', 'svm_g'], 'rf': ['rf_t'], 'ert': ['ert_t'], 'mnb': ['mnb_a'], 'knn': ['knn_n'],
@@ -158,17 +211,17 @@ def make_clf_pk():
 
 def params_clf(args):
     params = {'scale': scale_ctrl(args.clf, args.scale), 'top_n': top_n_ctrl(args.clf, args.top_n),
-              'metrics': args.metrics, 'clf_param_keys': make_clf_pk()}
+              'metrics': metric_ctrl(args.metric), 'clf_param_keys': make_clf_pk()}
     return params
 
 
 def params_arc(args):
-    params = {'metrics': args.metrics}
+    params = {'metrics': metric_ctrl(args.metric)}
     return params
 
 
 def params_rank(args):
-    params = {'top_n': top_n_ctrl(args.clf, args.top_n), 'metrics': args.metrics}
+    params = {'top_n': top_n_ctrl(args.clf, args.top_n), 'metrics': metric_ctrl(args.metric)}
     return params
 
 
