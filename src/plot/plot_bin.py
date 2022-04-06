@@ -86,13 +86,8 @@ def plot_3d(data, labels, fig_path, old=True):
     plt.ylabel('Second PC', fontsize=12)
     axes3d.set_zlabel('Third PC', fontsize=12)
 
-    plt.savefig(fig_path, dpi=600, transparent=True, bbox_inches='tight')
+    plt.savefig(fig_path, bbox_inches='tight')
     plt.close(0)
-    full_path = os.path.abspath(fig_path)
-    if os.path.isfile(full_path):
-        print('The output 3D-figure for dimension reduction can be found:')
-        print(full_path)
-        print('\n')
 
 
 def box_fig(aupr_list, auc_list, ndcg_list, labels, fig_path):
