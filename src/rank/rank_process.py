@@ -8,7 +8,7 @@ from rank.ltr_impl import ltr_train
 from utils import util_params, util_eval
 
 
-def rank_out(args):
+def rank_out(args, params):
     opt_list = []
     opt_val = 0.0
     for clf in args.clf:
@@ -20,7 +20,7 @@ def rank_out(args):
     # print(list(args.metrics))
     # print(opt_list)
     # exit()
-    metric_data = {'metric': list(args.metrics), 'val': opt_list}
+    metric_data = {'metric': params['metrics'], 'val': opt_list}
     metric_pd = pd.DataFrame(metric_data)
     metric_pd.to_csv(args.no_int_path + 'final_result.csv')
 
@@ -95,7 +95,7 @@ def int_test(args):
 
 def int_or_rank(args, params):
     if args.rank == 'none':
-        rank_out(args)
+        rank_out(args, params)
     else:
         int_train(args, params)
 

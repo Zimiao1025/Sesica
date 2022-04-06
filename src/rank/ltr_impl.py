@@ -36,6 +36,7 @@ def ltr_train(train_x, train_y, train_g, val_x, val_y, val_g, int_path, params):
     pd.DataFrame(best_param).to_csv(int_path + 'params.csv')
     joblib.dump(gbm, int_path + 'ltr_model.pkl')
     val_prob = gbm.predict(val_x)
+    # print(val_prob)
     np.save(int_path + 'prob.npy', val_prob)
     # metric: auc, aupr, ndcg@k, roc@k
     metric_df = evaluation(params['metrics'], val_y, val_prob, val_g)

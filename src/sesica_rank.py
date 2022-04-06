@@ -37,10 +37,9 @@ if __name__ == '__main__':
     # parameters for no grid search
     parse.add_argument('-gs_mode', type=int, choices=[0, 1, 2], default=0,
                        help="grid = 0 for no grid search, 1 for rough grid search, 2 for meticulous grid search.")
-    parse.add_argument('-metrics', type=str, nargs='*', choices=['aupr', 'auc', 'ndcg', 'ndcg@1', 'roc@1', 'ndcg@5',
-                                                                 'roc@5', 'ndcg@10', 'roc@10', 'ndcg@20', 'roc@20',
-                                                                 'ndcg@50', 'roc@50'], default=['aupr'],
-                       help="The metrics for parameters selection")
+    parse.add_argument('-metric', type=str,
+                       choices=['aupr', 'auc', 'ndcg', 'roc@1', 'ndcg@10', 'roc@10', 'ndcg@20', 'roc@20', 'ndcg@50',
+                                'roc@50'], default='aupr', help="The metrics used for parameters selection")
     # parameters for ltr
     parse.add_argument('-ltr_m', type=int, default=[0], nargs='*',
                        help="Maximum tree depth for base learners, <=0 means no limit.")

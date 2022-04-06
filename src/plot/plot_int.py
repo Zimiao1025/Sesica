@@ -9,11 +9,11 @@ def bar_fig(model_path, feats_name, fig_path):
     scores = gbm.feature_importances_
     print(scores)
     plt.figure(0)
-    bar_width = 0.35
+    bar_width = 0.4
     x1 = []
     for i in range(len(scores)):
         x1.append(i)
-    plt.bar(x1, scores, bar_width, color='crimson', align="center",  label="scores", alpha=0.5)
+    plt.bar(x1, scores, bar_width, color='crimson', align="center",  label="scores", alpha=0.8)
     plt.xticks(x1, feats_name, size=10)
     plt.title('Feature importance for LTR', fontsize=18)
     plt.xlabel('method', fontsize=16)
@@ -24,15 +24,18 @@ def bar_fig(model_path, feats_name, fig_path):
     ax.spines['left'].set_linewidth(ax_width)
     ax.spines['top'].set_linewidth(ax_width)
     ax.spines['right'].set_linewidth(ax_width)
-    plt.savefig(fig_path, dpi=600, transparent=True, bbox_inches='tight')
+    plt.savefig(fig_path, bbox_inches='tight')
     plt.close(0)
 
 
-def pie_fig(data, recipe, fig_path):
-    print(recipe)
-    fig, ax = plt.subplots(figsize=(6, 3), subplot_kw=dict(aspect="equal"))
+def pie_fig(model_path, recipe, fig_path):
+    gbm = joblib.load(model_path)
+    scores = gbm.feature_importances_
+    weight = scores / sum(scores)
+    print(weight)
+    fig, ax = plt.subplots(figsize=(9, 7), subplot_kw=dict(aspect="equal"))
     # startangle 设置方向
-    wedges, texts = ax.pie(data, wedgeprops=dict(width=0.5), startangle=-40)
+    wedges, texts = ax.pie(weight, wedgeprops=dict(width=0.5), startangle=-40)
 
     # 每一类别说明框
     # boxstyle框的类型，fc填充颜色,ec边框颜色,lw边框宽度
@@ -51,9 +54,9 @@ def pie_fig(data, recipe, fig_path):
         connectionstyle = "angle,angleA=0,angleB={}".format(ang)
         kw["arrowprops"].update({"connectionstyle": connectionstyle})
         # 设置标注
-        ax.annotate(recipe[i], xy=(x, y), xytext=(1.35 * np.sign(x), 1.4 * y),
+        ax.annotate(recipe[i], xy=(x, y), xytext=(1.1 * np.sign(x), 1.2 * y),
                     horizontalalignment=horizontalalignment, color='black', **kw)
 
-    # ax.set_title("Matplotlib bakery: A donut")
-
-    plt.savefig(fig_path)
+    plt.title('Feature importance for LTR', fontsize=18)
+    plt.savefig(fig_path, bbox_inches='tight')
+    plt.close(0)

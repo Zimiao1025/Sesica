@@ -27,10 +27,15 @@ def polar_fig(methods, val_list, metric_list, fig_path):
     # 设置为极坐标格式
     ax = fig.add_subplot(111, polar=True)
     # 绘制折线图
-    color_sets = cycle(['crimson', 'navy', 'teal', 'darkorange', 'slategrey'])
+    color_sets = cycle(['crimson', 'navy', 'teal', 'darkorange', 'purple', 'gray', 'green', 'dodgerblue', 'gold',
+                        'lightcoral', 'red'])
     for method, cyc_val, cor in zip(methods, cyc_val_list, color_sets):
         ax.plot(angles, cyc_val, 'o-', linewidth=2, label=method)
-        ax.fill(angles, cyc_val, cor, alpha=0.5)
+        ax.fill(angles, cyc_val, cor, alpha=0.2)
+
+    angle = np.deg2rad(0)
+    ax.legend(loc="lower left",
+              bbox_to_anchor=(.5 + np.cos(angle) / 2, .5 + np.sin(angle) / 2))
     # 添加每个特质的标签
     metric_list = np.concatenate((metric_list, [metric_list[0]]))
     ax.set_thetagrids(angles * 180 / np.pi, metric_list)
@@ -40,11 +45,11 @@ def polar_fig(methods, val_list, metric_list, fig_path):
     plt.title('Polar fig')
     # 增加网格纸
     ax.grid(True)
-    plt.savefig(fig_path)
+    plt.savefig(fig_path, bbox_inches='tight')
     plt.close(0)
 
 
-def plot_3d(data, labels, fig_path):
+def plot_3d(data, labels, fig_path, old=True):
     try:
         # print(data)
         data_3d = TSNE(n_components=3, init='pca', random_state=1025).fit_transform(data)
@@ -73,7 +78,10 @@ def plot_3d(data, labels, fig_path):
     for i in range(len(data_3d)):
         axes3d.scatter(data_3d[i][0], data_3d[i][1], data_3d[i][2], s=40, c=mc[i][1], alpha=0.7)
 
-    plt.title('3D-figure of dimension reduction', fontsize=18)
+    if old:
+        plt.title('3D-figure of raw feature', fontsize=18)
+    else:
+        plt.title('3D-figure of score feature', fontsize=18)
     plt.xlabel('First PC', fontsize=12)
     plt.ylabel('Second PC', fontsize=12)
     axes3d.set_zlabel('Third PC', fontsize=12)
@@ -87,21 +95,53 @@ def plot_3d(data, labels, fig_path):
         print('\n')
 
 
-def box_fig(dt, fig_path):
-    plt.boxplot(x=dt.values, labels=dt.columns, whis=1.5, showfliers=False)  # columns列索引，values所有数值
-    plt.savefig(fig_path)
+def box_fig(aupr_list, auc_list, ndcg_list, labels, fig_path):
+    # set parameters for fig
+    x_location = np.linspace(2, len(labels), len(labels))  # len(data个序列)
+    width = 0.2
+    colors = ['crimson', 'navy', 'teal']
+
+    fig = plt.figure(figsize=(16, 9))
+    # fig.tight_layout()
+    ax1 = fig.add_subplot(111)
+    rect_1 = ax1.bar(x_location - width, aupr_list, width=width, color=colors[0], linewidth=1, alpha=0.7)
+    rect_2 = ax1.bar(x_location, auc_list, width=width, color=colors[1], linewidth=1, alpha=0.7)
+    rect_3 = ax1.bar(x_location + width, ndcg_list, width=width, color=colors[2], linewidth=1, alpha=0.7)
+    # 添加x轴标签
+    plt.xticks(x_location + width, labels, fontsize=12, rotation=20)  # 横坐标轴标签 rotation x轴标签旋转的角度
+
+    # 图例
+    ax1.legend((rect_1, rect_2, rect_3), (u'aupr', u'auc', u'ndcg'), fontsize=14)  # 图例
+    # 添加数据标签
+    for r1, r2, r3, amount01, amount02, amount03 in zip(rect_1, rect_2, rect_3, aupr_list, auc_list, ndcg_list):
+        plt.text(r1.get_x(), r1.get_height(), round(amount01, 2), va='bottom')
+        plt.text(r2.get_x(), r2.get_height(), round(amount02, 2), va='bottom')
+        plt.text(r3.get_x(), r3.get_height(), round(amount03, 2), va='bottom')
+
+    plt.title('The histogram for evaluation metrics', fontsize=18)
+    plt.xlabel('Base method', fontsize=14, labelpad=10)
+    plt.ylabel('Value', fontsize=14, labelpad=10)
+    plt.savefig(fig_path, bbox_inches='tight')
     plt.close(0)
-    # sns.boxplot(x="distance", y="method", data=dt, whis=[0, 100], width=.6, palette="vlag")
 
 
 def dist_fig(prob_arr, dist_method, fig_path):
     sns.set_palette("hls")  # 设置所有图的颜色，使用hls色彩空间
-    color_sets = ['crimson', 'navy', 'teal', 'darkorange', 'slategrey']
-    print(prob_arr)
-    print(prob_arr[:, 1])
+    color_sets = ['crimson', 'navy', 'teal', 'darkorange', 'purple', 'gray', 'green', 'dodgerblue', 'gold',
+                  'lightcoral', 'red']
+    # print(prob_arr)
+    # print(prob_arr[:, 1])
+    fig = plt.figure()
+    # fig.tight_layout()
+    ax = fig.add_subplot(111)
     for i in range(len(dist_method)):
-        plt.hist(prob_arr[:, i], bins=20, rwidth=0.8, alpha=0.7, histtype='bar', color=color_sets[i], label=dist_method[i])
-    plt.savefig(fig_path)
+        plt.hist(prob_arr[:, i], bins=20, rwidth=0.5, alpha=0.5, histtype='bar', color=color_sets[i],
+                 label=dist_method[i])
+    ax.legend(loc="upper left", bbox_to_anchor=(1, 1))
+    plt.title('Frequency distribution histogram', fontsize=18)
+    plt.xlabel('Score', fontsize=14, labelpad=10)
+    plt.ylabel('Frequency', fontsize=14, labelpad=10)
+    plt.savefig(fig_path, bbox_inches='tight')
     plt.close(0)
 
 
@@ -110,18 +150,18 @@ def hp_fig(dt, fig_path):
 
     # Compute the correlation matrix
     corr = dt.corr()
-
     # Generate a mask for the upper triangle
     mask = np.triu(np.ones_like(corr, dtype=bool))
 
     # Set up the matplotlib figure
-    f, ax = plt.subplots(figsize=(11, 9))
+    fig, ax = plt.subplots(figsize=(11, 9))
+    ax.tick_params(axis='y', labelsize=14)
+    ax.tick_params(axis='x', labelsize=16)
 
-    # Generate a custom diverging colormap
-    c_map = sns.diverging_palette(250, 20, as_cmap=True)
+    sns.heatmap(corr, cmap="RdBu_r", mask=mask, annot=True,
+                square=True, linewidths=.5, cbar_kws={"shrink": .5}, fmt='.2f')
 
-    # Draw the heatmap with the mask and correct aspect ratio
-    sns.heatmap(corr, cmap=c_map, vmax=.3, center=0, mask=mask,
-                square=True, linewidths=.5, cbar_kws={"shrink": .5})
-
-    f.savefig(fig_path)  # 减少边缘空白
+    # ax.legend(loc="upper left", bbox_to_anchor=(1, 1))
+    plt.title('The correlation of different methods', fontsize=18)
+    plt.savefig(fig_path, bbox_inches='tight')
+    plt.close(0)

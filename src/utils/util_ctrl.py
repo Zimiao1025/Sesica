@@ -141,6 +141,9 @@ def plot_path_ctrl(args):
     if args.arc != 'none':
         for arc in args.arc:
             args.ssc_path[arc] = args.res_dir + arc + '/'
+    if args.rank == 'ltr':
+        if len(args.clf) + len(args.arc) >= 2:
+            args.int_path = args.res_dir + 'ltr/'
     # create directory for plotting
     if args.plot != 'none':
         args.fig_dir = path_check(args.res_dir + 'plot/')
@@ -226,5 +229,5 @@ def params_rank(args):
 
 
 def params_plot(args):
-    params = {'top_n': top_n_ctrl(args.clf, args.top_n)}
+    params = {'top_n': top_n_ctrl(args.clf, args.top_n), 'metrics': metric_ctrl(args.metric)}
     return params
