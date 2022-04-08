@@ -146,9 +146,9 @@ def plot_fig(args, ind, params):
             true_y = np.load(args.data_dir + 'valid_y.npy') if not ind else np.load(args.data_dir + 'ind_y.npy')
             new_x, new_prob, new_y = data_rus(true_x, prob_arr, true_y)
             old_fig_path = args.fig_dir + 'old_dr_3d.png' if not ind else args.fig_dir + 'old_dr_3d_ind.png'
-            plot_bin.plot_3d(new_x, new_y, old_fig_path)
+            plot_bin.plot_3d(new_x, new_y, old_fig_path, old=True)
             new_fig_path = args.fig_dir + 'new_dr_3d.png' if not ind else args.fig_dir + 'new_dr_3d_ind.png'
-            plot_bin.plot_3d(new_prob, new_y, new_fig_path)
+            plot_bin.plot_3d(new_prob, new_y, new_fig_path, old=False)
         elif pl == 'dist':
             # dist_method = ['svm_1', 'rf_1']
             true_y = np.load(args.data_dir + 'valid_y.npy') if not ind else np.load(args.data_dir + 'ind_y.npy')
