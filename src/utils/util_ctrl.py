@@ -193,6 +193,8 @@ def scale_ctrl(clf, scale):
         scale_dict['mlp'] = 'mms'
     if 'knn' in clf:
         scale_dict['knn'] = 'mms'
+    if 'mnb' in clf:
+        scale_dict['mnb'] = 'mms'
     return scale_dict
 
 
