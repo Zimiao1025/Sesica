@@ -51,7 +51,7 @@ def polar_fig(methods, val_list, metric_list, fig_path):
 def plot_3d(data, labels, fig_path, old=True):
     try:
         # print(data)
-        data_3d = TSNE(n_components=3, init='pca', random_state=1025).fit_transform(data)
+        data_3d = TSNE(n_components=3, init='pca', learning_rate='auto', random_state=1025).fit_transform(data)
     except RuntimeWarning:
         data_3d = KernelPCA(n_components=3, random_state=1025).fit_transform(data)
 
