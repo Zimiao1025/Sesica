@@ -1,4 +1,3 @@
-import os
 from itertools import cycle
 
 import matplotlib.pyplot as plt
@@ -31,7 +30,7 @@ def polar_fig(methods, val_list, metric_list, fig_path):
                         'lightcoral', 'red'])
     for method, cyc_val, cor in zip(methods, cyc_val_list, color_sets):
         ax.plot(angles, cyc_val, 'o-', linewidth=2, label=method)
-        ax.fill(angles, cyc_val, cor, alpha=0.2)
+        ax.fill(angles, cyc_val, cor, alpha=0.1)
 
     angle = np.deg2rad(0)
     ax.legend(loc="lower left",
@@ -73,15 +72,17 @@ def plot_3d(data, labels, fig_path, old=True):
     for i in range(len(labels)):
         mc[i][0], mc[i][1] = mark_set[my_dict[labels[i]]], color_set[my_dict[labels[i]]]
     fig = plt.figure(0)
+    # ax = fig.add_subplot(111)
     axes3d = Axes3D(fig)
 
     for i in range(len(data_3d)):
         axes3d.scatter(data_3d[i][0], data_3d[i][1], data_3d[i][2], s=40, c=mc[i][1], alpha=0.7)
 
     if old:
-        plt.title('3D-figure of raw feature', fontsize=18)
+        plt.title('3D-figure of raw feature', fontsize=16)
     else:
-        plt.title('3D-figure of score feature', fontsize=18)
+        plt.title('3D-figure of score feature', fontsize=16)
+    # ax.legend(loc="upper left", bbox_to_anchor=(1, 1), labels=['pos'])
     plt.xlabel('First PC', fontsize=12)
     plt.ylabel('Second PC', fontsize=12)
     axes3d.set_zlabel('Third PC', fontsize=12)
