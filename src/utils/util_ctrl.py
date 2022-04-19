@@ -51,15 +51,15 @@ def path_check(target_dir):
             print("Path '" + target_dir + "' has been created!")
         except OSError:
             pass
-    else:
-        # 先删除再创建
-        try:
-            import shutil
-            shutil.rmtree(target_dir)
-            os.makedirs(target_dir)
-            print("Path '" + target_dir + "' has been created!")
-        except OSError:
-            pass
+    # else:
+    #     # 先删除再创建
+    #     try:
+    #         import shutil
+    #         shutil.rmtree(target_dir)
+    #         os.makedirs(target_dir)
+    #         print("Path '" + target_dir + "' has been created!")
+    #     except OSError:
+    #         pass
     return target_dir
 
 

@@ -52,9 +52,9 @@ def rt_params_check(tree, gs_mode=0):
             sys.stderr.write(error_info)
             return False
     elif gs_mode == 1:
-        t_range = range(100, 600, 100)
+        t_range = [64, 128, 256, 512, 1024]
     else:
-        t_range = range(100, 600, 200)
+        t_range = [32, 64, 128, 256, 512, 1024, 2048]
 
     return t_range
 
@@ -72,9 +72,9 @@ def knn_params_check(num, gs_mode=0):
             sys.stderr.write(error_info)
             return False
     elif gs_mode == 1:
-        n_range = [1, 5, 10, 20, 50, 100, 200]
-    else:
         n_range = [5, 10, 20, 50, 100]
+    else:
+        n_range = [1, 5, 10, 20, 50, 100, 200]
 
     return n_range
 
@@ -116,9 +116,9 @@ def lgb_params_check(tree, num_leaves, gs_mode=0):
             sys.stderr.write(error_info)
             return False
     elif gs_mode == 1:
-        t_range = range(100, 600, 100)
+        t_range = [64, 128, 256, 512, 1024]
     else:
-        t_range = range(100, 600, 200)
+        t_range = [32, 64, 128, 256, 512, 1024, 2048]
 
     if gs_mode == 0:
         if len(num_leaves) == 1:
@@ -132,20 +132,20 @@ def lgb_params_check(tree, num_leaves, gs_mode=0):
             sys.stderr.write(error_info)
             return False
     elif gs_mode == 1:
-        n_range = [31, 63, 127, 255, 511, 1025]
+        n_range = [31, 63, 127, 255, 511]
     else:
-        n_range = [31, 63, 127, 255]
+        n_range = [15, 31, 63, 127, 255, 511, 1025]
 
     return t_range, n_range
 
 
 def clf_params_control(clf, args, params):
     if clf == 'svm':
-        params['svm_c'], params['svm_g'] = svm_params_check(args.svm_c, args.svm_c, args.gs_mode)
+        params['svm_c'], params['svm_g'] = svm_params_check(args.svm_c, args.svm_g, args.gs_mode)
     elif clf == 'rf':
         params['rf_t'] = rt_params_check(args.rf_t, args.gs_mode)
     elif clf == 'ert':
-        params['ert_t'] = rt_params_check(args.rf_t, args.gs_mode)
+        params['ert_t'] = rt_params_check(args.ert_t, args.gs_mode)
     elif clf == 'knn':
         params['knn_n'] = knn_params_check(args.knn_n, args.gs_mode)
     elif clf == 'mnb':
@@ -249,9 +249,9 @@ def ltr_params_check(max_depth, n_estimators, num_leaves, gs_mode=0):
             sys.stderr.write(error_info)
             return False
     elif gs_mode == 1:
-        t_range = range(100, 600, 100)
+        t_range = [64, 128, 256, 512, 1024]
     else:
-        t_range = range(100, 600, 200)
+        t_range = [32, 64, 128, 256, 512, 1024, 2048]
 
     if gs_mode == 0:
         if len(num_leaves) == 1:
@@ -265,9 +265,9 @@ def ltr_params_check(max_depth, n_estimators, num_leaves, gs_mode=0):
             sys.stderr.write(error_info)
             return False
     elif gs_mode == 1:
-        n_range = [31, 63, 127, 255, 511, 1025]
+        n_range = [31, 63, 127, 255, 511]
     else:
-        n_range = [31, 63, 127, 255]
+        n_range = [15, 31, 63, 127, 255, 511, 1025]
 
     return m_range, t_range, n_range
 

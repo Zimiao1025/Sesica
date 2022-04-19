@@ -5,7 +5,6 @@ from utils import util_data, util_ctrl, util_graph
 
 
 def data_clf_train(index_arr, sp_associations, a_encodings, b_encodings):
-    print(len(index_arr))
     vectors = []
     labels = []
     length = len(index_arr)

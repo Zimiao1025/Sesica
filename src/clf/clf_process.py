@@ -26,6 +26,7 @@ def clf_train(args, params):
     for clf in args.clf:
         params = util_params.clf_params_control(clf, args, params)
         if params['scale'][clf] != 'none':
+            print('The normalize: %s -- %s' % (clf, params['scale'][clf]))
             train_x = util_data.pre_fit(train_x, params['scale'][clf], args.scale_path)
             valid_x = util_data.pre_trans(valid_x, params['scale'][clf], args.scale_path)
 
