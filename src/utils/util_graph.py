@@ -12,7 +12,7 @@ def load_vec_encodings(vec_file):
         for idx, line in enumerate(lines):
             # vec_id = idx // 2
             if line.startswith('>'):
-                vec_name = line.strip().split()[1]
+                vec_name = line.split('>')[1].strip()
                 vector = lines[idx+1].strip().split()
                 vector = list(map(float, vector))
                 vectors.append(vector)
