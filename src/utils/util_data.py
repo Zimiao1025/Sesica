@@ -31,3 +31,10 @@ def pre_trans(valid_x, sc_method, scale_path):
     model_path = scale_path + sc_method + '_scale.pkl'
     scale = joblib.load(model_path)
     return scale.transform(valid_x)
+
+
+def normalize_prob(prob):
+    scale = MinMaxScaler()
+    scale.fit(prob)
+    new_prob = scale.transform(prob)
+    return new_prob.flatten()

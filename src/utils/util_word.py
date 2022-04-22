@@ -4,7 +4,7 @@ import numpy as np
 
 from utils.util_fasta import get_seqs
 
-ALPHABET = {'DNA': 'ACGT', 'RNA': 'ACGU', 'Protein': 'ACDEFGHIKLMNPQRSTVWY'}
+ALPHABET = {'DNA': 'ACGTX', 'RNA': 'ACGUX', 'Protein': 'ACDEFGHIKLMNPQRSTVWYX'}
 ALPHABET_X = {'DNA': 'ACGTX', 'RNA': 'ACGUX', 'Protein': 'ACDEFGHIKLMNPQRSTVWYX'}
 
 

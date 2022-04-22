@@ -122,6 +122,9 @@ def evaluation(metrics, val_y, val_prob, val_g):
 
         group_eval_dict = {}
         for metric in metrics:
+            # print(metric)
+            # print(y_true)
+            # print(y_prob)
             group_eval_dict[metric] = group_eval(metric, y_true, y_prob)
         eval_res.append(group_eval_dict)
         count += group

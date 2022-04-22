@@ -83,7 +83,7 @@ def arc_bmk(args):
 def main(args):
     print("\n******************************** Analysis ********************************\n")
     args = util_ctrl.arc_path_ctrl(args)
-    # arc_bmk(args)
+    arc_bmk(args)
     params = util_ctrl.params_arc(args)
     # print(params)
     arc_process.arc_ctrl(args, params)
@@ -134,10 +134,9 @@ if __name__ == '__main__':
                             " 'hbmp' --- this model is an implementation of Sentence Embeddings in NLI with Iterative Refinement Encoders;\n"
                             " 'none' --- none of model will be selected..\n"
                        )
-    parse.add_argument('-metrics', type=str, nargs='*', choices=['aupr', 'auc', 'ndcg', 'ndcg@1', 'roc@1', 'ndcg@5',
-                                                                 'roc@5', 'ndcg@10', 'roc@10', 'ndcg@20', 'roc@20',
-                                                                 'ndcg@50', 'roc@50'], default=['aupr'],
-                       help="The metrics for parameters selection")
+    parse.add_argument('-metric', type=str,
+                       choices=['aupr', 'auc', 'ndcg', 'roc@1', 'ndcg@10', 'roc@10', 'ndcg@20', 'roc@20', 'ndcg@50',
+                                'roc@50'], default='aupr', help="The metrics used for parameters selection")
     # parameters for arci
     parse.add_argument('-arci_neg', type=int, default=4, help="Number of negative samples for ranking of arci model.")
     parse.add_argument('-arci_epoch', type=int, default=5, help="Number of epochs for training of arci model.")
