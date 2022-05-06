@@ -41,7 +41,7 @@ def match_pyramid_train(train_set, valid_set, test_set, model_path, ind_set=None
     model = mz.models.MatchPyramid()
     model.params['task'] = ranking_task
     model.params['embedding'] = np.empty([10000, 100], dtype=float)
-    model.params['kernel_count'] = [16, 32]
+    model.params['kernel_count'] = [ 16, 32]
     model.params['kernel_size'] = [[3, 3], [3, 3]]
     model.params['dpool_size'] = [3, 10]
     model.params['dropout_rate'] = 0.1

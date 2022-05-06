@@ -1,6 +1,5 @@
-import numpy as np
-import torch
 import matchzoo as mz
+import torch
 
 
 def drmm_train(train_set, valid_set, test_set, model_path, ind_set=None, params=None):

@@ -43,7 +43,7 @@ def esim_train(train_set, valid_set, test_set, model_path, ind_set=None, params=
     model.params['embedding'] = np.empty([10000, 100], dtype=float)
     model.params['mask_value'] = 0
     model.params['dropout'] = 0.2
-    model.params['hidden_size'] = 200
+    model.params['hidden_size'] =  200
     model.params['lstm_layer'] = 1
     model.build()
     print(model)

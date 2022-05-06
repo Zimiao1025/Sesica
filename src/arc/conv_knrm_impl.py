@@ -41,7 +41,8 @@ def conv_knrm_train(train_set, valid_set, test_set, model_path, ind_set=None, pa
     model = mz.models.ConvKNRM()
 
     model.params['task'] = ranking_task
-    model.params['embedding'] = np.empty([10000, 100], dtype=float)
+    model.params['embedding_input_dim'] = params['knrm_emb_in']
+    model.params['embedding_output_dim'] = params['knrm_emb_out']
     model.params['filters'] = 128
     model.params['conv_activation_func'] = 'tanh'
     model.params['max_ngram'] = 3

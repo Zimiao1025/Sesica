@@ -12,8 +12,8 @@ def duet_train(train_set, valid_set, test_set, model_path, ind_set=None, params=
     ]
 
     padding_callback = mz.models.DUET.get_default_padding_callback(
-        fixed_length_left=10,
-        fixed_length_right=40,
+        fixed_length_left=params['vocab_size'],
+        fixed_length_right=params['vocab_size'],
         pad_word_value=0,
         pad_word_mode='pre',
         with_ngram=True
@@ -45,24 +45,20 @@ def duet_train(train_set, valid_set, test_set, model_path, ind_set=None, params=
 
     model = mz.models.DUET()
     model.params['task'] = ranking_task
-    model.params['left_length'] = 10
-    model.params['right_length'] = 40
-    model.params['lm_filters'] = 100
-    model.params['mlp_num_layers'] = 2
-    model.params['mlp_num_units'] = 100
-    model.params['mlp_num_fan_out'] = 100
-    model.params['mlp_activation_func'] = 'tanh'
-    model.params['vocab_size'] = 3000  # preprocessor.context['ngram_vocab_size']
-    model.params['dm_conv_activation_func'] = 'relu'
-    model.params['dm_filters'] = 100
-    model.params['dm_kernel_size'] = 3
-    model.params['dm_right_pool_size'] = 4
-    model.params['dropout_rate'] = 0.2
+    model.params['left_length'] = params['vocab_size']
+    model.params['right_length'] = params['vocab_size']
+    model.params['mlp_num_layers'] = params['duet_layers']
+    model.params['mlp_num_units'] = params['duet_units']
+    model.params['vocab_size'] = params['vocab_size']
+    model.params['dropout_rate'] = params['duet_dropout']
+    # params['mlp_num_fan_out'] = 3
+    model.params['lm_filters'] = 3
+    model.params['dm_filters'] = 3
     model.build()
     print(model)
     print('Trainable params: ', sum(p.numel() for p in model.parameters() if p.requires_grad))
 
-    optimizer = torch.optim.Adadelta(model.parameters())
+    optimizer = torch.optim.Adadelta(model.parameters(), lr=params['duet_lr'])
 
     trainer = mz.trainers.Trainer(
         model=model,
@@ -70,7 +66,7 @@ def duet_train(train_set, valid_set, test_set, model_path, ind_set=None, params=
         trainloader=train_loader,
         validloader=valid_loader,
         validate_interval=None,
-        epochs=10,
+        epochs=params['duet_epoch'],
         model_path=model_path
     )
 

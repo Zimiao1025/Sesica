@@ -98,7 +98,7 @@ def trans_pd(file_name, arc, params):
                 'ngram_right': pd.Series(text_right_list),
                 'length_right': pd.Series(length_right_list),
                 'label': pd.Series(label_list)}
-    elif arc == 'cdssm':
+    elif arc in ['cdssm', 'duet']:
         ngram_left_list = trans_ngram(pd_data['text_left'].values, params['ngram'])
         ngram_right_list = trans_ngram(pd_data['text_right'].values, params['ngram'])
         data = {'id_left': pd.Series(id_left_list),

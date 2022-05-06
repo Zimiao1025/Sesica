@@ -40,12 +40,16 @@ def match_lstm_train(train_set, valid_set, test_set, model_path, ind_set=None, p
 
     model = mz.models.MatchLSTM()
     model.params['task'] = ranking_task
+    model.params['embedding_input_dim'] = params['match_lstm_emb_in']
+    model.params['embedding_output_dim'] = params['match_lstm_emb_out']
+    model.params['dropout'] = params['match_lstm_dropout']
+    model.params['hidden_size'] = params['match_lstm_hs']
     model.params['mask_value'] = 0
-    model.params['embedding'] = np.empty([10000, 100], dtype=float)
+    model.guess_and_fill_missing_params()
     model.build()
     print(model, sum(p.numel() for p in model.parameters() if p.requires_grad))
 
-    optimizer = torch.optim.Adadelta(model.parameters())
+    optimizer = torch.optim.Adadelta(model.parameters(), lr=params['match_lstm_lr'])
 
     trainer = mz.trainers.Trainer(
         model=model,
@@ -53,7 +57,7 @@ def match_lstm_train(train_set, valid_set, test_set, model_path, ind_set=None, p
         trainloader=train_loader,
         validloader=valid_loader,
         validate_interval=None,
-        epochs=10,
+        epochs=params['match_lstm_epoch'],
         model_path=model_path
     )
 

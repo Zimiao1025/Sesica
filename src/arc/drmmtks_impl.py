@@ -40,17 +40,18 @@ def drmmtks_train(train_set, valid_set, test_set, model_path, ind_set=None, para
 
     model = mz.models.DRMMTKS()
     model.params['task'] = ranking_task
-    model.params['embedding'] = np.empty([10000, 100], dtype=float)
+    model.params['top_k'] = params['drmmtks_top_k']
+    model.params['embedding_input_dim'] = params['drmmtks_emb_in']
+    model.params['embedding_output_dim'] = params['drmmtks_emb_out']
+    model.params['mlp_num_layers'] = params['drmmtks_layers']
+    model.params['mlp_num_units'] = params['drmmtks_units']
     model.params['mask_value'] = 0
-    model.params['top_k'] = 10
-    model.params['mlp_activation_func'] = 'tanh'
-
+    model.guess_and_fill_missing_params()
     model.build()
-
     print(model)
     print('Trainable params: ', sum(p.numel() for p in model.parameters() if p.requires_grad))
 
-    optimizer = torch.optim.Adadelta(model.parameters())
+    optimizer = torch.optim.Adadelta(model.parameters(), lr=params['drmmtks_lr'])
 
     trainer = mz.trainers.Trainer(
         model=model,
@@ -58,7 +59,7 @@ def drmmtks_train(train_set, valid_set, test_set, model_path, ind_set=None, para
         trainloader=train_loader,
         validloader=valid_loader,
         validate_interval=None,
-        epochs=10,
+        epochs=params['drmmtks_epoch'],
         model_path=model_path
     )
 

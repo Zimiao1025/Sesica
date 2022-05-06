@@ -207,6 +207,20 @@ def arc_params_control(arc, args, params):
         params['cdssm_units'] = args.cdssm_units
         # params['cdssm_emb_out'] = args.cdssm_emb
         params['vocab_size'] = args.fixed_len
+    elif arc == 'mv_lstm':
+        params['num_neg']['mv_lstm'] = args.mv_lstm_neg
+        params['mv_lstm_epoch'] = args.mv_lstm_epoch
+        params['mv_lstm_dropout'] = args.mv_lstm_dropout
+        params['mv_lstm_lr'] = args.mv_lstm_lr
+        params['mv_lstm_hs'] = args.mv_lstm_hs
+        params['mv_lstm_top_k'] = args.mv_lstm_top_k
+        params['mv_lstm_layers'] = args.mv_lstm_layers
+        params['mv_lstm_units'] = args.mv_lstm_units
+        params['mv_lstm_emb_out'] = args.mv_lstm_emb
+        if args.category == 'Protein':
+            params['mv_lstm_emb_in'] = 21 ** args.word_size
+        else:
+            params['mv_lstm_emb_in'] = 5 ** args.word_size
     elif arc == 'drmm':
         params['num_neg']['drmm'] = args.drmm_neg
         params['drmm_epoch'] = args.drmm_epoch
@@ -218,6 +232,47 @@ def arc_params_control(arc, args, params):
             params['drmm_emb_in'] = 21 ** args.word_size
         else:
             params['drmm_emb_in'] = 5 ** args.word_size
+    elif arc == 'drmmtks':
+        params['num_neg']['drmmtks'] = args.drmmtks_neg
+        params['drmmtks_epoch'] = args.drmmtks_epoch
+        params['drmmtks_lr'] = args.drmmtks_lr
+        params['drmmtks_top_k'] = args.drmmtks_top_k
+        params['drmmtks_layers'] = args.drmmtks_layers
+        params['drmmtks_units'] = args.drmmtks_units
+        params['drmmtks_emb_out'] = args.drmmtks_emb
+        if args.category == 'Protein':
+            params['drmmtks_emb_in'] = 21 ** args.word_size
+        else:
+            params['drmmtks_emb_in'] = 5 ** args.word_size
+    elif arc == 'match_lstm':
+        params['num_neg']['match_lstm'] = args.match_lstm_neg
+        params['match_lstm_epoch'] = args.match_lstm_epoch
+        params['match_lstm_dropout'] = args.match_lstm_dropout
+        params['match_lstm_lr'] = args.match_lstm_lr
+        params['match_lstm_hs'] = args.match_lstm_hs
+        params['match_lstm_emb_out'] = args.match_lstm_emb
+        if args.category == 'Protein':
+            params['match_lstm_emb_in'] = 21 ** args.word_size
+        else:
+            params['match_lstm_emb_in'] = 5 ** args.word_size
+    elif arc == 'duet':
+        params['num_neg']['duet'] = args.duet_neg
+        params['duet_epoch'] = args.duet_epoch
+        params['duet_dropout'] = args.duet_dropout
+        params['duet_lr'] = args.duet_lr
+        params['duet_layers'] = args.duet_layers
+        params['duet_units'] = args.duet_units
+        params['vocab_size'] = args.fixed_len
+        params['ngram'] = args.duet_ngram
+    elif arc == 'knrm':
+        params['num_neg']['knrm'] = args.knrm_neg
+        params['knrm_epoch'] = args.knrm_epoch
+        params['knrm_lr'] = args.knrm_lr
+        params['knrm_emb_out'] = args.knrm_emb
+        if args.category == 'Protein':
+            params['knrm_emb_in'] = 21 ** args.word_size
+        else:
+            params['knrm_emb_in'] = 5 ** args.word_size
     return params
 
 

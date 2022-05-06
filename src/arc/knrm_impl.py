@@ -40,15 +40,17 @@ def knrm_train(train_set, valid_set, test_set, model_path, ind_set=None, params=
 
     model = mz.models.KNRM()
     model.params['task'] = ranking_task
-    model.params['embedding'] = np.empty([10000, 100], dtype=float)
+    model.params['embedding_input_dim'] = params['knrm_emb_in']
+    model.params['embedding_output_dim'] = params['knrm_emb_out']
     model.params['kernel_num'] = 21
     model.params['sigma'] = 0.1
     model.params['exact_sigma'] = 0.001
+    model.guess_and_fill_missing_params()
     model.build()
     print(model)
     print('Trainable params: ', sum(p.numel() for p in model.parameters() if p.requires_grad))
 
-    optimizer = torch.optim.Adadelta(model.parameters())
+    optimizer = torch.optim.Adadelta(model.parameters(), params['knrm_lr'])
 
     trainer = mz.trainers.Trainer(
         model=model,
@@ -56,7 +58,7 @@ def knrm_train(train_set, valid_set, test_set, model_path, ind_set=None, params=
         trainloader=train_loader,
         validloader=valid_loader,
         validate_interval=None,
-        epochs=10,
+        epochs=params['knrm_epoch'],
         model_path=model_path
     )
 

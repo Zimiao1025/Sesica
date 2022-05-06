@@ -42,6 +42,7 @@ def dssm_train(train_set, valid_set, test_set, model_path, ind_set=None, params=
     model.params['vocab_size'] = params['vocab_size']
     model.params['mlp_num_layers'] = params['dssm_layers']
     model.params['mlp_num_units'] = params['dssm_units']
+    model.guess_and_fill_missing_params()
     model.build()
     print(model)
     print('Trainable params: ', sum(p.numel() for p in model.parameters() if p.requires_grad))

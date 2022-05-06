@@ -48,6 +48,7 @@ def cdssm_train(train_set, valid_set, test_set, model_path, ind_set=None, params
     model.params['mlp_num_layers'] = params['cdssm_layers']  # 1
     model.params['mlp_num_units'] = params['cdssm_units']  # 64
     model.params['dropout_rate'] = params['cdssm_dropout']  # 0.8
+    model.guess_and_fill_missing_params()
     model.build()
     print(model)
     print('Trainable params: ', sum(p.numel() for p in model.parameters() if p.requires_grad))
