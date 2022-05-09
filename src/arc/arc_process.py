@@ -1,10 +1,11 @@
 import re
 
-import matchzoo as mz
+
 import numpy as np
 import pandas as pd
 
 from arc._common import prob_metric_cal
+import matchzoo as mz
 from arc.anmm_impl import anmm_train
 from arc.arci_impl import arci_train
 from arc.arcii_impl import arcii_train
