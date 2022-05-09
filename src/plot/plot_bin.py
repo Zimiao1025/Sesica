@@ -154,7 +154,8 @@ def hp_fig(dt, fig_path):
     ax.tick_params(axis='y', labelsize=14)
     ax.tick_params(axis='x', labelsize=16)
 
-    sns.heatmap(corr, cmap="RdBu_r", mask=mask, annot=True,
+    cmp = sns.diverging_palette(mask.shape[0], mask.shape[1], as_cmap=True)  # "RdBu_r"
+    sns.heatmap(corr, cmap=cmp, mask=mask, annot=True,
                 square=True, linewidths=.5, cbar_kws={"shrink": .5}, fmt='.2f')
 
     # ax.legend(loc="upper left", bbox_to_anchor=(1, 1))

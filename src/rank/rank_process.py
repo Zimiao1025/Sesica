@@ -46,9 +46,12 @@ def int_train(args, params):
     for clf in args.clf:
         model_path = args.ssc_path[clf]
         valid_prob = pd.read_csv(model_path + 'valid_prob.csv', dtype=np.float)
-        train_x.append(valid_prob.values[:, 1:].flatten())
+        top_n = params['top_n'][clf]
+        for n in range(1, top_n + 1):
+            train_x.append(valid_prob['top_'+str(n)].values.flatten())
         test_prob = pd.read_csv(model_path + 'test_prob.csv', dtype=np.float)
-        valid_x.append(test_prob.values[:, 1:].flatten())
+        for n in range(1, top_n + 1):
+            valid_x.append(test_prob['top_'+str(n)].values.flatten())
 
     # training dataset
     train_x = np.array(train_x).transpose()
