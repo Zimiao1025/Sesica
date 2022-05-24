@@ -8,17 +8,20 @@ def data_clf_train(index_arr, sp_associations, a_encodings, b_encodings):
     vectors = []
     labels = []
     length = len(index_arr)
+    connections = []
     for i in range(length):
         index = index_arr[i]
         for pos_index in sp_associations[index][0]:
             vec = np.hstack((a_encodings[index], b_encodings[pos_index]))
             vectors.append(vec)
             labels.append(1.0)
+            connections.append([index, pos_index, 1.0])
         for neg_index in sp_associations[index][1]:
             vec = np.hstack((a_encodings[index], b_encodings[neg_index]))
             vectors.append(vec)
             labels.append(0.0)
-    return np.array(vectors, dtype=float), np.array(labels, dtype=float)
+            connections.append([index, neg_index, 0.0])
+    return np.array(vectors, dtype=float), np.array(labels, dtype=float), np.array(connections, dtype=float)
 
 
 def data_clf_valid(index_arr, associations, a_encodings, b_encodings):
@@ -26,18 +29,22 @@ def data_clf_valid(index_arr, associations, a_encodings, b_encodings):
     labels = []
     groups = []
     length = len(index_arr)
+    connections = []
     for i in range(length):
         index = index_arr[i]
         for pos_index in associations[index][0]:
             vec = np.hstack((a_encodings[index], b_encodings[pos_index]))
             vectors.append(vec)
             labels.append(1.0)
+            connections.append([index, pos_index, 1.0])
         for neg_index in associations[index][1]:
             vec = np.hstack((a_encodings[index], b_encodings[neg_index]))
             vectors.append(vec)
             labels.append(0.0)
+            connections.append([index, neg_index, 0.0])
         groups.append(len(associations[index][0]) + len(associations[index][1]))
-    return np.array(vectors, dtype=float), np.array(labels, dtype=float), np.array(groups, dtype=int)
+    return np.array(vectors, dtype=float), np.array(labels, dtype=float), np.array(groups, dtype=int), \
+           np.array(connections, dtype=float)
 
 
 def data_clf_score(a_encodings, b_encodings, tag='A'):
@@ -78,23 +85,26 @@ def clf_bmk_hetero(args):
 
     # under-sampling for a balanced training set
     sp_associations = util_ctrl.sp_ctrl(associations)
-    train_x, train_y = data_clf_train(train_index, sp_associations, a_encodings, b_encodings)
+    train_x, train_y, train_net = data_clf_train(train_index, sp_associations, a_encodings, b_encodings)
     # validation set (Question: associations or sp_associations?)
-    valid_x, valid_y, valid_g = data_clf_valid(valid_index, associations, a_encodings, b_encodings)
+    valid_x, valid_y, valid_g, valid_net = data_clf_valid(valid_index, associations, a_encodings, b_encodings)
     # testing set
-    test_x, test_y, test_g = data_clf_valid(test_index, associations, a_encodings, b_encodings)
+    test_x, test_y, test_g, test_net = data_clf_valid(test_index, associations, a_encodings, b_encodings)
     # save data for repeating experiment
     # training
     np.save(args.data_dir + 'train_x.npy', train_x)
     np.save(args.data_dir + 'train_y.npy', train_y)
+    np.save(args.data_dir + 'train_net.npy', train_net)
     # validation
     np.save(args.data_dir + 'valid_x.npy', valid_x)
     np.save(args.data_dir + 'valid_y.npy', valid_y)
     np.save(args.data_dir + 'valid_g.npy', valid_g)
+    np.save(args.data_dir + 'valid_net.npy', valid_net)
     # testing
     np.save(args.data_dir + 'test_x.npy', test_x)
     np.save(args.data_dir + 'test_y.npy', test_y)
     np.save(args.data_dir + 'test_g.npy', test_g)
+    np.save(args.data_dir + 'test_net.npy', test_net)
 
 
 def clf_bmk_homo(args):
@@ -110,23 +120,26 @@ def clf_bmk_homo(args):
     # prepare train dataset and valid dataset for ml or dl
     # under-sampling for a balanced training set
     sp_associations = util_ctrl.sp_ctrl(associations)
-    train_x, train_y = data_clf_train(train_index, sp_associations, a_encodings, a_encodings)
+    train_x, train_y, train_net = data_clf_train(train_index, sp_associations, a_encodings, a_encodings)
     # validation set (Question: associations or sp_associations?)
-    valid_x, valid_y, valid_g = data_clf_valid(valid_index, associations, a_encodings, a_encodings)
+    valid_x, valid_y, valid_g, valid_net = data_clf_valid(valid_index, associations, a_encodings, a_encodings)
     # testing set
-    test_x, test_y, test_g = data_clf_valid(test_index, associations, a_encodings, a_encodings)
+    test_x, test_y, test_g, test_net = data_clf_valid(test_index, associations, a_encodings, a_encodings)
     # save data for repeating experiment
     # training
     np.save(args.data_dir + 'train_x.npy', train_x)
     np.save(args.data_dir + 'train_y.npy', train_y)
+    np.save(args.data_dir + 'train_net.npy', train_net)
     # validation
     np.save(args.data_dir + 'valid_x.npy', valid_x)
     np.save(args.data_dir + 'valid_y.npy', valid_y)
     np.save(args.data_dir + 'valid_g.npy', valid_g)
+    np.save(args.data_dir + 'valid_net.npy', valid_net)
     # testing
     np.save(args.data_dir + 'test_x.npy', test_x)
     np.save(args.data_dir + 'test_y.npy', test_y)
     np.save(args.data_dir + 'test_g.npy', test_g)
+    np.save(args.data_dir + 'test_net.npy', test_net)
 
 
 def clf_test_hetero(args):
@@ -141,13 +154,14 @@ def clf_test_hetero(args):
     index_list, associations = util_graph.unpack_associations(pos_pairs, neg_pairs)
 
     # under-sampling for a balanced training set
-    ind_x, ind_y, ind_g = data_clf_valid(index_list, associations, a_encodings, b_encodings)
+    ind_x, ind_y, ind_g, ind_net = data_clf_valid(index_list, associations, a_encodings, b_encodings)
 
     # save data for repeating experiment
     # ind
     np.save(args.data_dir + 'ind_x.npy', ind_x)
     np.save(args.data_dir + 'ind_y.npy', ind_y)
     np.save(args.data_dir + 'ind_g.npy', ind_g)
+    np.save(args.data_dir + 'ind_net.npy', ind_net)
 
 
 def clf_test_homo(args):
@@ -161,13 +175,14 @@ def clf_test_homo(args):
     index_list, associations = util_graph.unpack_associations(pos_pairs, neg_pairs)
 
     # under-sampling for a balanced training set
-    ind_x, ind_y, ind_g = data_clf_valid(index_list, associations, a_encodings, a_encodings)
+    ind_x, ind_y, ind_g, ind_net = data_clf_valid(index_list, associations, a_encodings, a_encodings)
 
     # save data for repeating experiment
     # ind
     np.save(args.data_dir + 'ind_x.npy', ind_x)
     np.save(args.data_dir + 'ind_y.npy', ind_y)
     np.save(args.data_dir + 'ind_g.npy', ind_g)
+    np.save(args.data_dir + 'ind_net.npy', ind_net)
 
 
 def clf_score_hetero(args):

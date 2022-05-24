@@ -150,15 +150,12 @@ def hp_fig(dt, fig_path):
     mask = np.triu(np.ones_like(corr, dtype=bool))
 
     # Set up the matplotlib figure
-    fig, ax = plt.subplots(figsize=(11, 9))
-    ax.tick_params(axis='y', labelsize=14)
-    ax.tick_params(axis='x', labelsize=16)
+    plt.figure()
 
-    cmp = sns.diverging_palette(mask.shape[0], mask.shape[1], as_cmap=True)  # "RdBu_r"
+    cmp = sns.diverging_palette(250, 10, as_cmap=True)  # "RdBu_r"
     sns.heatmap(corr, cmap=cmp, mask=mask, annot=True,
-                square=True, linewidths=.5, cbar_kws={"shrink": .5}, fmt='.2f')
+                square=True, linewidths=.5, fmt='.2f')
 
-    # ax.legend(loc="upper left", bbox_to_anchor=(1, 1))
     plt.title('The correlation of different methods', fontsize=18)
     plt.savefig(fig_path, bbox_inches='tight')
     plt.close(0)

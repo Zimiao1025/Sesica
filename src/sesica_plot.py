@@ -16,6 +16,8 @@ if __name__ == '__main__':
 
     # parameters for plot
     parse.add_argument('-base_dir', required=True, help="The relative path or absolute path to store result.")
+    parse.add_argument('-data_type', required=True, choices=['hetero', 'homo'],
+                       help="Select the input heterogeneous data or homogeneous data.")
     parse.add_argument('-ind', choices=[True, False], default=False,
                        help="The input files for positive and negative associations.")
     parse.add_argument('-clf', type=str, nargs='*',
@@ -32,8 +34,8 @@ if __name__ == '__main__':
                             " 'ltr' --- Learning to rank with LambdaRank.\n")
     parse.add_argument('-plot_set', type=str, choices=['valid', 'test'], default='valid',
                        help="Plot the results on validation dataset or testing dataset.\n")
-    parse.add_argument('-plot', type=str, choices=['prc', 'roc', 'box', 'polar', 'hp', 'dr', 'dist', 'pie', 'bar',
-                                                   'none'], default='none', nargs='*',
+    parse.add_argument('-plot', type=str, choices=['net', 'prc', 'roc', 'box', 'polar', 'hp', 'dr', 'dist', 'pie',
+                                                   'bar', 'none'], default='none', nargs='*',
                        help="Plot:\n"
                             " 'none' --- Don't plot;\n"
                             " 'prc' --- precision-recall Curve; 'roc' --- receiver operating characteristic;\n"

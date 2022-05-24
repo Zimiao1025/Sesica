@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from plot import plot_bin, plot_curve, plot_int
+from plot import plot_bin, plot_curve, plot_int, plot_net
 
 
 def load_prob(args, ind, plot_set, params):
@@ -125,7 +125,19 @@ def plot_fig(args, ind, plot_set, params):
     # prc, roc, box, hp, 3d, dist, pie, bar
     print(args.plot)
     for pl in args.plot:
-        if pl in ['prc', 'roc']:
+        if pl == 'net':
+            if plot_set == 'valid':
+                net_arr = np.load(args.data_dir + 'valid_net.npy') if not ind else np.load(args.data_dir + 'ind_net.npy')
+            else:
+                net_arr = np.load(args.data_dir + 'test_net.npy') if not ind else np.load(args.data_dir + 'ind_net.npy')
+            args.rank = 'none'
+            prob_dict = load_prob(args, ind, plot_set, params)
+            args.rank = 'ltr'
+            txt_path = args.fig_dir + 'net.txt' if not ind else args.fig_dir + 'net_ind.txt'
+            fig_path = args.fig_dir + 'net.png' if not ind else args.fig_dir + 'net_ind.png'
+            plot_net.save_txt(args.data_type, net_arr, prob_dict, txt_path)
+            plot_net.net_fig(txt_path, fig_path)
+        elif pl in ['prc', 'roc']:
             metric = 'aupr' if pl == 'prc' else 'auc'
             au_dict = load_metric(args, ind, plot_set, metric, params)
             print('au_dict: ', au_dict)
