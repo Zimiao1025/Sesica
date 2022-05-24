@@ -17,7 +17,7 @@ def net_fig(txt_file, fig_path):
     G.remove_nodes_from(nodes)
 
     # remove low-degree nodes
-    low_degree = [n for n, d in G.degree() if d < 3]
+    low_degree = [n for n, d in G.degree() if d < 10]
     G.remove_nodes_from(low_degree)
     # print(list(G.edges(data=True)))
     # exit()
@@ -27,12 +27,13 @@ def net_fig(txt_file, fig_path):
     H = G.subgraph(largest_component)
 
     # compute centrality
-    centrality = nx.betweenness_centrality(H, k=3, endpoints=True)
+    centrality = nx.betweenness_centrality(H, k=10, endpoints=True)
 
     # compute community structure
     lpc = nx.community.label_propagation_communities(H)
+    print(lpc)
     community_index = {n: i for i, com in enumerate(lpc) for n in com}
-
+    print(community_index)
     # ### draw graph ####
     fig, ax = plt.subplots(figsize=(20, 15))
     pos = nx.spring_layout(H, k=0.15, seed=1025)
