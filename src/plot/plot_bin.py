@@ -26,7 +26,7 @@ def polar_fig(methods, val_list, metric_list, fig_path):
     # 设置为极坐标格式
     ax = fig.add_subplot(111, polar=True)
     # 绘制折线图
-    color_sets = cycle(['crimson', 'navy', 'teal', 'darkorange', 'purple', 'gray', 'green', 'dodgerblue', 'gold',
+    color_sets = cycle(['crimson', 'navy', 'teal', 'darkorange', 'green', 'purple', 'gray', 'dodgerblue', 'gold',
                         'lightcoral', 'red'])
     for method, cyc_val, cor in zip(methods, cyc_val_list, color_sets):
         ax.plot(angles, cyc_val, 'o-', linewidth=2, label=method)
@@ -42,6 +42,7 @@ def polar_fig(methods, val_list, metric_list, fig_path):
     ax.set_ylim(0, 1)
     # 添加标题
     plt.title('Polar fig')
+    plt.title('Polar fig for all metrics', fontsize=20)
     # 增加网格纸
     ax.grid(True)
     plt.savefig(fig_path, bbox_inches='tight')
@@ -131,7 +132,7 @@ def dist_fig(prob_arr, dist_method, fig_path):
     # fig.tight_layout()
     ax = fig.add_subplot(111)
     for i in range(len(dist_method)):
-        plt.hist(prob_arr[:, i], bins=20, rwidth=0.5, alpha=0.5, histtype='bar', color=color_sets[i],
+        plt.hist(prob_arr[:, i], bins=20, rwidth=1, alpha=0.3, histtype='bar', color=color_sets[i],
                  label=dist_method[i])
     ax.legend(loc="upper left", bbox_to_anchor=(1, 1))
     plt.title('Frequency distribution histogram', fontsize=18)

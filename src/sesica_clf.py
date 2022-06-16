@@ -71,7 +71,8 @@ def clf_bmk_hetero(args):
     a_df.to_csv(args.data_dir + 'bmk_vec_a.csv')
     b_df.to_csv(args.data_dir + 'bmk_vec_b.csv')
     pos_pairs, neg_pairs = util_graph.load_connections(args.bmk_label)
-
+    print('pos associations : neg associations = %d : %d (sum = %d)' % (
+        len(pos_pairs), len(neg_pairs), len(pos_pairs) + len(neg_pairs)))
     # split dataset for parameter selection
     index_list, associations = util_graph.unpack_associations(pos_pairs, neg_pairs)
     train_index, valid_index, test_index = util_data.dataset_split(index_list)
@@ -112,7 +113,8 @@ def clf_bmk_homo(args):
     a_df, a_encodings = util_graph.load_vec_encodings(args.bmk_vec)
     a_df.to_csv(args.data_dir + 'bmk_vec.csv')
     pos_pairs, neg_pairs = util_graph.load_connections(args.bmk_label)
-
+    print('pos associations : neg associations = %d : %d (sum = %d)' % (
+        len(pos_pairs), len(neg_pairs), len(pos_pairs) + len(neg_pairs)))
     # split dataset for parameter selection
     index_list, associations = util_graph.unpack_associations(pos_pairs, neg_pairs)
     train_index, valid_index, test_index = util_data.dataset_split(index_list)
@@ -224,6 +226,7 @@ def main(args):
         if args.data_type == 'hetero':
             print(' |Heterogeneous| '.center(40, '-'))
             clf_bmk_hetero(args)
+            exit()
             clf_process.clf_train(args, params)
             clf_process.clf_eval(args, params)
             if args.ind == 'test':
@@ -238,6 +241,7 @@ def main(args):
         else:
             print(' |Homogeneous| '.center(40, '-'))
             clf_bmk_homo(args)
+            exit()
             clf_process.clf_train(args, params)
             clf_process.clf_eval(args, params)
             if args.ind == 'test':
@@ -273,7 +277,7 @@ if __name__ == '__main__':
     parse.add_argument('-ind_vec', help="The feature vector files of homogeneous independent datasets.")
     parse.add_argument('-ind_label', nargs='*',
                        help="The input files for positive and negative associations of independent datasets."
-                       "File of positive associations should input before file of negative associations.")
+                            "File of positive associations should input before file of negative associations.")
     parse.add_argument('-clf', type=str, nargs='*',
                        choices=['svm', 'rf', 'ert', 'knn', 'mnb', 'gbdt', 'dart', 'goss', 'mlp', 'none'],
                        default='none',

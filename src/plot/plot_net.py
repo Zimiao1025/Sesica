@@ -12,12 +12,12 @@ def net_fig(txt_file, fig_path):
     # G = nx.read_edgelist("pos_homo_pairs.txt")
 
     # remove randomly selected nodes (to make example fast)
-    num_to_remove = int(len(G) / 1.5)
-    nodes = sample(list(G.nodes), num_to_remove)
-    G.remove_nodes_from(nodes)
+    # num_to_remove = int(len(G) / 1.5)
+    # nodes = sample(list(G.nodes), num_to_remove)
+    # G.remove_nodes_from(nodes)
 
     # remove low-degree nodes
-    low_degree = [n for n, d in G.degree() if d < 10]
+    low_degree = [n for n, d in G.degree() if d < 3]
     G.remove_nodes_from(low_degree)
     # print(list(G.edges(data=True)))
     # exit()
@@ -27,18 +27,18 @@ def net_fig(txt_file, fig_path):
     H = G.subgraph(largest_component)
 
     # compute centrality
-    centrality = nx.betweenness_centrality(H, k=10, endpoints=True)
+    centrality = nx.betweenness_centrality(H, k=3, endpoints=True)
 
     # compute community structure
     lpc = nx.community.label_propagation_communities(H)
-    print(lpc)
+    # print(lpc)
     community_index = {n: i for i, com in enumerate(lpc) for n in com}
-    print(community_index)
+    # print(community_index)
     # ### draw graph ####
     fig, ax = plt.subplots(figsize=(20, 15))
     pos = nx.spring_layout(H, k=0.15, seed=1025)
     node_color = [community_index[n] for n in H]
-    node_size = [v * 20000 for v in centrality.values()]
+    node_size = [v * 30000 for v in centrality.values()]
     nx.draw_networkx(
         H,
         pos=pos,
@@ -50,13 +50,13 @@ def net_fig(txt_file, fig_path):
     )
 
     # Title/legend
-    font = {"color": "k", "fontweight": "bold", "fontsize": 32}
+    font = {"color": "k", "fontweight": "bold", "fontsize": 48}
     ax.set_title("Association network", font)
     # Change font color for legend
-    font_new = {"color": "r", "fontsize": 18}
+    font_new = {"color": "r", "fontsize": 24}
 
     ax.text(
-        0.80,
+        0.10,
         0.10,
         "node color = community structure",
         horizontalalignment="center",
@@ -64,7 +64,7 @@ def net_fig(txt_file, fig_path):
         fontdict=font_new,
     )
     ax.text(
-        0.80,
+        0.10,
         0.06,
         "node size = betweeness centrality",
         horizontalalignment="center",
