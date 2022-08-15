@@ -1,5 +1,5 @@
-# Sesica
-semantic similarity calculation
+# BioSeq-Diabolo
+biological sequence similarity analysing using Diabolo.
 
 **Software Requirements:**
 
@@ -8,7 +8,7 @@ semantic similarity calculation
 * [CUDA 10.0](https://developer.nvidia.com/cuda-10.0-download-archive) (Optional If using GPU)
 * [cuDNN (>= 7.4.1)](https://developer.nvidia.com/cudnn) (Optional If using GPU)
 
-Sesica has been tested on Windows, Ubuntu 16.04, and 18.04 operating systems.
+BioSeq-Diabolo has been tested on Windows, Ubuntu 16.04, and 18.04 operating systems.
 
 ## Installation
 
@@ -80,7 +80,7 @@ python sesica_clf.py -base_dir ../data/go -data_type hetero -bmk_vec_a ../data/g
 
 python sesica_rank.py -base_dir ../data/go -rank ltr -clf svm rf ert knn mlp -metric aupr -gs_mode 2
 
-python sesica_plot.py -base_dir ../data/ProtRe -data_type homo -clf svm rf ert knn mlp -rank ltr -plot polar dr dist pie bar -plot_set test
+python sesica_plot.py -base_dir ../data/go -data_type homo -clf svm rf ert knn mlp -rank ltr -plot polar dr dist pie bar -plot_set test
 
 ```
 
